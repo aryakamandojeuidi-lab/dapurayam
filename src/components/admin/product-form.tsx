@@ -40,6 +40,9 @@ type Props = {
     isActive?: boolean;
     isFeatured?: boolean;
     featuredOrder?: number;
+    shopeeUrl?: string | null;
+    tokopediaUrl?: string | null;
+    websiteOrderEnabled?: boolean | null;
   };
   categories: Category[];
   submitLabel?: string;
@@ -70,6 +73,11 @@ export function ProductForm({
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
   const [isFeatured, setIsFeatured] = useState(initialData?.isFeatured ?? false);
   const [featuredOrder, setFeaturedOrder] = useState(initialData?.featuredOrder ?? 0);
+  const [shopeeUrl, setShopeeUrl] = useState(initialData?.shopeeUrl || "");
+  const [tokopediaUrl, setTokopediaUrl] = useState(initialData?.tokopediaUrl || "");
+  const [websiteOrderEnabled, setWebsiteOrderEnabled] = useState(
+    initialData?.websiteOrderEnabled ?? true,
+  );
 
   const onNameChange = (v: string) => {
     setName(v);
@@ -101,6 +109,9 @@ export function ProductForm({
     formData.set("isActive", String(isActive));
     formData.set("isFeatured", String(isFeatured));
     formData.set("featuredOrder", String(featuredOrder));
+    formData.set("shopeeUrl", shopeeUrl);
+    formData.set("tokopediaUrl", tokopediaUrl);
+    formData.set("websiteOrderEnabled", String(websiteOrderEnabled));
 
     const res = await action(formData);
     setLoading(false);
@@ -266,6 +277,50 @@ export function ProductForm({
           </Card>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Kanal Pembelian</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-secondary/30 p-3">
+            <div>
+              <Label htmlFor="websiteOrderEnabled">Pemesanan via Website</Label>
+              <p className="text-xs text-muted-foreground">
+                Aktifkan tampil tombol "Tambah ke Keranjang" pada halaman detail
+                produk.
+              </p>
+            </div>
+            <Switch
+              id="websiteOrderEnabled"
+              checked={websiteOrderEnabled}
+              onCheckedChange={setWebsiteOrderEnabled}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="shopeeUrl">URL Produk di Shopee (opsional)</Label>
+            <Input
+              id="shopeeUrl"
+              value={shopeeUrl}
+              onChange={(e) => setShopeeUrl(e.target.value)}
+              placeholder="https://shopee.co.id/product/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Khusus untuk produk ini. Jika kosong, tombol Shopee akan tampil
+              "Belum Tersedia". Untuk link toko global, atur di Pengaturan.
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="tokopediaUrl">URL Produk di Tokopedia (opsional)</Label>
+            <Input
+              id="tokopediaUrl"
+              value={tokopediaUrl}
+              onChange={(e) => setTokopediaUrl(e.target.value)}
+              placeholder="https://www.tokopedia.com/..."
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

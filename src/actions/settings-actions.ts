@@ -22,6 +22,10 @@ export async function updateSettingsAction(formData: FormData) {
     footerText: String(formData.get("footerText") || "") || null,
     heroHeadline: String(formData.get("heroHeadline") || "") || null,
     heroSubtext: String(formData.get("heroSubtext") || "") || null,
+    shopeeStoreUrl: String(formData.get("shopeeStoreUrl") || "") || null,
+    tokopediaStoreUrl: String(formData.get("tokopediaStoreUrl") || "") || null,
+    positioningLabel: String(formData.get("positioningLabel") || "") || null,
+    freshnessNote: String(formData.get("freshnessNote") || "") || null,
   };
 
   const parsed = siteSettingsSchema.safeParse(raw);

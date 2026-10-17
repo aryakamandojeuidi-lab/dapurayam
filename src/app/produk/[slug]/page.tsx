@@ -9,17 +9,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ChevronRight, Package } from "lucide-react";
 import { PublicShell } from "@/components/public/public-shell";
 import { ProductCard } from "@/components/public/product-card";
 import { ArticleCard } from "@/components/public/article-card";
-import { WhatsAppButton } from "@/components/public/whatsapp-button";
+import { PurchaseOptions } from "@/components/public/purchase-options";
 import { db } from "@/lib/db";
-import { buildProductOrderMessage } from "@/lib/whatsapp";
 import { safeParseArray } from "@/lib/prisma-helpers";
 import { estimateReadingTime } from "@/lib/markdown";
+import { formatCurrency } from "@/lib/order-display";
+import { cn } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -133,6 +133,7 @@ export default async function ProductDetailPage({ params }: Props) {
           </Breadcrumb>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+            {/* Product image */}
             <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
               {product.imageUrl ? (
                 <img
@@ -147,83 +148,113 @@ export default async function ProductDetailPage({ params }: Props) {
               )}
             </div>
 
+            {/* Product info */}
             <div className="flex flex-col">
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Inline meta row — minimal, separator-based */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                 {product.category && (
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
+                  <span className="font-medium text-foreground">
                     {product.category.name}
-                  </Badge>
+                  </span>
                 )}
-                <Badge variant="outline" className="bg-secondary text-foreground">
+                <span aria-hidden className="text-border">·</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+                  Fresh by Order
+                </span>
+                <span aria-hidden className="text-border">·</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+                  Tanpa MSG &amp; Pengawet
+                </span>
+                <span aria-hidden className="text-border">·</span>
+                <span
+                  className={cn(
+                    "text-xs font-semibold",
+                    product.isActive ? "text-emerald-700" : "text-rose-700",
+                  )}
+                >
                   {product.isActive ? "Tersedia" : "Habis"}
-                </Badge>
+                </span>
               </div>
+
               <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                 {product.name}
               </h1>
               {product.shortDescription && (
-                <p className="mt-3 text-lg text-muted-foreground">
+                <p className="mt-3 text-lg text-muted-foreground leading-relaxed">
                   {product.shortDescription}
                 </p>
               )}
 
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="rounded-lg border border-border bg-card p-4">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Harga
-                  </p>
-                  {product.price ? (
-                    <p className="mt-1 text-xl font-semibold text-primary">
-                      Rp {product.price.toLocaleString("id-ID")}
+              {/* Price + Package — cleaner single row, prominent price */}
+              <div className="mt-6 rounded-lg border border-border bg-card p-5">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Harga
                     </p>
-                  ) : (
-                    <p className="mt-1 text-sm italic text-muted-foreground">
-                      Harga menyusul — hubungi via WhatsApp
-                    </p>
-                  )}
-                </div>
-                <div className="rounded-lg border border-border bg-card p-4">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Ukuran Kemasan
-                  </p>
-                  {product.packageSize ? (
-                    <p className="mt-1 text-base font-medium text-foreground">
-                      {product.packageSize}
-                    </p>
-                  ) : (
-                    <p className="mt-1 text-sm italic text-muted-foreground">
-                      Informasi akan diperbarui segera
-                    </p>
+                    {product.price ? (
+                      <p className="mt-1 text-2xl font-bold text-foreground tabular-nums">
+                        {formatCurrency(product.price)}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-sm italic text-muted-foreground">
+                        Harga menyusul — hubungi via WhatsApp
+                      </p>
+                    )}
+                  </div>
+                  {product.packageSize && (
+                    <div className="text-right">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Kemasan
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-foreground">
+                        {product.packageSize}
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <WhatsAppButton
-                  number={whatsappNumber}
-                  message={buildProductOrderMessage(product.name)}
-                  label="Pesan Produk Ini"
-                  size="lg"
-                  className="flex-1"
-                />
+              {/* Purchase options block */}
+              <PurchaseOptions
+                productId={product.id}
+                productName={product.name}
+                productSlug={product.slug}
+                productPrice={product.price}
+                productImageUrl={product.imageUrl}
+                whatsappNumber={whatsappNumber}
+                shopeeUrl={product.shopeeUrl}
+                tokopediaUrl={product.tokopediaUrl}
+                websiteOrderEnabled={product.websiteOrderEnabled}
+              />
+
+              <div className="mt-4">
                 <Link
                   href="/produk"
-                  className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary"
                 >
-                  <ArrowLeft className="h-4 w-4" /> Kembali ke Produk
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Kembali ke Produk
                 </Link>
               </div>
 
-              <Separator className="my-6" />
+              <Separator className="my-8" />
 
-              <div className="prose-warm space-y-5 text-foreground">
-                <h2 className="text-xl font-bold">Deskripsi Produk</h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  {product.description}
-                </p>
+              {/* Product description */}
+              <div className="space-y-6">
+                <section>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Deskripsi Produk
+                  </h2>
+                  <p className="mt-2 text-muted-foreground leading-relaxed">
+                    {product.description}
+                  </p>
+                </section>
 
-                <div>
-                  <h3 className="text-base font-semibold">Saran Penyajian</h3>
+                <section>
+                  <h3 className="text-base font-semibold text-foreground">
+                    Saran Penyajian
+                  </h3>
                   {product.servingSuggestion ? (
                     <p className="mt-2 text-muted-foreground leading-relaxed">
                       {product.servingSuggestion}
@@ -233,10 +264,12 @@ export default async function ProductDetailPage({ params }: Props) {
                       Informasi saran penyajian akan diperbarui segera.
                     </p>
                   )}
-                </div>
+                </section>
 
-                <div>
-                  <h3 className="text-base font-semibold">Komposisi</h3>
+                <section>
+                  <h3 className="text-base font-semibold text-foreground">
+                    Komposisi
+                  </h3>
                   {product.ingredients ? (
                     <p className="mt-2 text-muted-foreground leading-relaxed">
                       {product.ingredients}
@@ -246,10 +279,12 @@ export default async function ProductDetailPage({ params }: Props) {
                       Informasi komposisi akan diperbarui segera.
                     </p>
                   )}
-                </div>
+                </section>
 
-                <div>
-                  <h3 className="text-base font-semibold">Cara Penyimpanan</h3>
+                <section>
+                  <h3 className="text-base font-semibold text-foreground">
+                    Cara Penyimpanan
+                  </h3>
                   {product.storageInstructions ? (
                     <p className="mt-2 text-muted-foreground leading-relaxed">
                       {product.storageInstructions}
@@ -259,13 +294,13 @@ export default async function ProductDetailPage({ params }: Props) {
                       Informasi penyimpanan akan diperbarui segera.
                     </p>
                   )}
-                </div>
+                </section>
               </div>
             </div>
           </div>
 
           {related.length > 0 && (
-            <section className="mt-16">
+            <section className="mt-20">
               <h2 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                 Produk Terkait
               </h2>
@@ -293,7 +328,7 @@ export default async function ProductDetailPage({ params }: Props) {
           )}
 
           {relatedArticles.length > 0 && (
-            <section className="mt-16">
+            <section className="mt-20">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                   Artikel Terkait

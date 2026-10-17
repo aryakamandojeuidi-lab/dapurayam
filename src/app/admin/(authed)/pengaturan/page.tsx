@@ -50,6 +50,10 @@ export default async function AdminPengaturanPage() {
           footerText: settings?.footerText ?? "",
           heroHeadline: settings?.heroHeadline ?? "",
           heroSubtext: settings?.heroSubtext ?? "",
+          shopeeStoreUrl: settings?.shopeeStoreUrl ?? "",
+          tokopediaStoreUrl: settings?.tokopediaStoreUrl ?? "",
+          positioningLabel: settings?.positioningLabel ?? "",
+          freshnessNote: settings?.freshnessNote ?? "",
         }}
       />
     </div>

@@ -11,11 +11,11 @@ export function buildWhatsAppUrl(number: string, message: string): string {
 }
 
 export function buildProductOrderMessage(productName: string): string {
-  return `Halo Dapur Ayam, saya ingin bertanya dan memesan ${productName}. Mohon informasi harga dan ketersediaannya.`;
+  return `Halo Dapur Ayam, saya tertarik dan ingin memesan ${productName}. Karena produk dibuat fresh by order, mohon informasikan ketersediaan, harga, dan estimasi waktu pengolahan. Terima kasih.`;
 }
 
 export function buildGeneralInquiryMessage(): string {
-  return `Halo Dapur Ayam, saya ingin bertanya mengenai produk yang tersedia.`;
+  return `Halo Dapur Ayam, saya ingin bertanya mengenai produk yang tersedia, proses pemesanan, dan estimasi waktu pengolahan.`;
 }
 
 export function buildContactFormMessage(
@@ -24,4 +24,8 @@ export function buildContactFormMessage(
   message: string,
 ): string {
   return `Halo Dapur Ayam, saya ${name} (${email}). Pesan saya: ${message}`;
+}
+
+export function buildConsultationMessage(): string {
+  return `Halo Dapur Ayam, saya ingin konsultasi terkait produk olahan ayam yang tersedia, opsi pemesanan (website / Shopee / WhatsApp), serta kebutuhan khusus yang mungkin dapat Anda bantu. Mohon informasinya, terima kasih.`;
 }

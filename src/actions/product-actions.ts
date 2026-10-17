@@ -27,6 +27,9 @@ export async function createProductAction(formData: FormData) {
     isFeatured: formData.get("isFeatured") === "true",
     featuredOrder: Number(formData.get("featuredOrder") || 0),
     relatedArticleIds: [] as string[],
+    shopeeUrl: String(formData.get("shopeeUrl") || "") || null,
+    tokopediaUrl: String(formData.get("tokopediaUrl") || "") || null,
+    websiteOrderEnabled: formData.get("websiteOrderEnabled") === "true",
   };
 
   const parsed = productSchema.safeParse(raw);
@@ -49,6 +52,9 @@ export async function createProductAction(formData: FormData) {
         ingredients: parsed.data.ingredients || null,
         storageInstructions: parsed.data.storageInstructions || null,
         servingSuggestion: parsed.data.servingSuggestion || null,
+        shopeeUrl: parsed.data.shopeeUrl || null,
+        tokopediaUrl: parsed.data.tokopediaUrl || null,
+        websiteOrderEnabled: parsed.data.websiteOrderEnabled ?? true,
         relatedArticleIds: safeStringifyArray(parsed.data.relatedArticleIds || []),
       },
     });
@@ -87,6 +93,9 @@ export async function updateProductAction(id: string, formData: FormData) {
     isFeatured: formData.get("isFeatured") === "true",
     featuredOrder: Number(formData.get("featuredOrder") || 0),
     relatedArticleIds: [] as string[],
+    shopeeUrl: String(formData.get("shopeeUrl") || "") || null,
+    tokopediaUrl: String(formData.get("tokopediaUrl") || "") || null,
+    websiteOrderEnabled: formData.get("websiteOrderEnabled") === "true",
   };
 
   const parsed = productSchema.safeParse(raw);
@@ -110,6 +119,9 @@ export async function updateProductAction(id: string, formData: FormData) {
         ingredients: parsed.data.ingredients || null,
         storageInstructions: parsed.data.storageInstructions || null,
         servingSuggestion: parsed.data.servingSuggestion || null,
+        shopeeUrl: parsed.data.shopeeUrl || null,
+        tokopediaUrl: parsed.data.tokopediaUrl || null,
+        websiteOrderEnabled: parsed.data.websiteOrderEnabled ?? true,
         relatedArticleIds: safeStringifyArray(parsed.data.relatedArticleIds || []),
       },
     });

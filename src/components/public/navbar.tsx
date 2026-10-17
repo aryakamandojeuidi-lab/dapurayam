@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { WhatsAppButton } from "@/components/public/whatsapp-button";
+import { CartBadge } from "@/components/public/cart-badge";
 
 type Props = {
   whatsappNumber: string;
@@ -18,7 +19,7 @@ const NAV_ITEMS = [
   { label: "Beranda", href: "/" },
   { label: "Produk", href: "/produk" },
   { label: "Journal", href: "/journal" },
-  { label: "Tentang Kami", href: "/tentang" },
+  { label: "Tentang", href: "/tentang" },
   { label: "Kontak", href: "/kontak" },
 ];
 
@@ -40,20 +41,20 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur transition-shadow",
+        "sticky top-0 z-50 w-full border-b border-border/60 bg-background/90 backdrop-blur transition-shadow",
         scrolled ? "shadow-sm" : "shadow-none",
       )}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold tracking-tight"
+          className="flex items-center gap-2.5"
           aria-label={`${businessName} beranda`}
         >
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
             <Drumstick className="h-5 w-5" />
           </span>
-          <span className="text-lg text-foreground">
+          <span className="text-lg font-bold tracking-tight text-foreground">
             {businessName || "Dapur Ayam"}
           </span>
         </Link>
@@ -75,23 +76,25 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
           ))}
         </nav>
 
-        <div className="hidden md:block">
-          <WhatsAppButton
-            number={whatsappNumber}
-            label="Pesan Sekarang"
-            size="default"
-          />
+        <div className="flex items-center gap-2">
+          <CartBadge className="hidden sm:inline-flex" />
+          <div className="hidden md:block">
+            <WhatsAppButton
+              number={whatsappNumber}
+              label="Pesan"
+              size="default"
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setOpen(true)}
+            aria-label="Buka menu"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setOpen(true)}
-          aria-label="Buka menu"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -121,10 +124,11 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
               </Link>
             ))}
           </div>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col gap-3">
+            <CartBadge className="w-full justify-center" />
             <WhatsAppButton
               number={whatsappNumber}
-              label="Pesan Sekarang"
+              label="Pesan via WhatsApp"
               className="w-full"
             />
           </div>

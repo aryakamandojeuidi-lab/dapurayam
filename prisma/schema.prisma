@@ -45,6 +45,11 @@ model Product {
   categoryId          String?
   category            Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   relatedArticleIds   String?
+  // External marketplace links (optional)
+  shopeeUrl           String?
+  tokopediaUrl        String?
+  // Toggle website checkout (display "Tambah ke Keranjang" on product page)
+  websiteOrderEnabled Boolean   @default(true)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -103,5 +108,60 @@ model SiteSettings {
   footerText       String?
   heroHeadline     String?
   heroSubtext      String?
+  // Marketplace links (global storefront)
+  shopeeStoreUrl   String?
+  tokopediaStoreUrl String?
+  // Positioning statement (premium, fresh-made-by-order)
+  positioningLabel String?
+  freshnessNote    String?
   updatedAt        DateTime @updatedAt
+}
+
+// Order represents a customer's purchase request submitted via the website.
+// Since checkout is still manual (admin confirms via WhatsApp), this is a "lead"
+// that admin manages inside the CMS until a payment gateway is integrated later.
+model Order {
+  id           String      @id @default(cuid())
+  orderNumber  String      @unique
+  // Customer info
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  customerAddress String?
+  customerNote  String?
+  // Preferred channel: WEBSITE (this form), SHOPEE, WHATSAPP
+  channel      String      @default("WEBSITE")
+  // Status workflow: PENDING → CONFIRMED → PROCESSING → SHIPPED → COMPLETED / CANCELLED
+  status       String      @default("PENDING")
+  // Admin internal notes (not shown to customer)
+  adminNote    String?
+  // Optional snapshot fields (in case product details change later)
+  totalItems   Int         @default(0)
+  totalAmount  Float       @default(0)
+  // Relation to items
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([status])
+  @@index([channel])
+  @@index([createdAt])
+  @@index([orderNumber])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  productName String
+  productSlug String?
+  // Snapshot price at the time of order
+  unitPrice   Float    @default(0)
+  quantity    Int      @default(1)
+  subtotal   Float    @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
 }

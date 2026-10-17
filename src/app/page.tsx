@@ -30,6 +30,8 @@ export default async function HomePage() {
         headline={headline}
         subtext={subtext}
         whatsappNumber={whatsappNumber}
+        positioningLabel={settings?.positioningLabel}
+        freshnessNote={settings?.freshnessNote}
       />
       <FeaturedProducts
         products={featured.map((p) => ({
@@ -50,7 +52,10 @@ export default async function HomePage() {
       <ProcessSection />
       <OrderingSteps />
       <FaqSection />
-      <CtaSection whatsappNumber={whatsappNumber} />
+      <CtaSection
+        whatsappNumber={whatsappNumber}
+        shopeeStoreUrl={settings?.shopeeStoreUrl}
+      />
     </PublicShell>
   );
 }

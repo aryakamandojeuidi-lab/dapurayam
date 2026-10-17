@@ -10,6 +10,7 @@ import {
   Settings,
   Drumstick,
   LogOut,
+  ShoppingCart,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Pesanan", href: "/admin/pesanan", icon: ShoppingCart },
   { label: "Produk", href: "/admin/produk", icon: Package },
   { label: "Kategori", href: "/admin/kategori", icon: FolderTree },
   { label: "Journal", href: "/admin/journal", icon: Newspaper },

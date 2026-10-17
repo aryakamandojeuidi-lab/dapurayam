@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Drumstick, Instagram, Facebook, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
+import { Drumstick, Mail, MapPin, Clock, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Settings = {
@@ -14,13 +14,15 @@ type Settings = {
   facebookUrl: string | null;
   tiktokUrl: string | null;
   footerText: string | null;
+  shopeeStoreUrl?: string | null;
+  tokopediaStoreUrl?: string | null;
 };
 
 const NAV_ITEMS = [
   { label: "Beranda", href: "/" },
   { label: "Produk", href: "/produk" },
   { label: "Journal", href: "/journal" },
-  { label: "Tentang Kami", href: "/tentang" },
+  { label: "Tentang", href: "/tentang" },
   { label: "Kontak", href: "/kontak" },
 ];
 
@@ -34,7 +36,7 @@ export function Footer({ settings, className }: { settings: Settings | null; cla
       )}
     >
       <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-3">
             <Link href="/" className="flex items-center gap-2">
@@ -45,21 +47,22 @@ export function Footer({ settings, className }: { settings: Settings | null; cla
                 {s?.businessName || "Dapur Ayam"}
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground">{s?.tagline}</p>
-            {s?.description && (
-              <p className="text-sm text-muted-foreground line-clamp-3">{s.description}</p>
-            )}
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {s?.tagline}
+            </p>
           </div>
 
           {/* Navigation */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-foreground">Navigasi</h3>
-            <ul className="space-y-2">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Navigasi
+            </h3>
+            <ul className="space-y-2.5">
               {NAV_ITEMS.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                    className="text-sm text-foreground/80 transition-colors hover:text-primary"
                   >
                     {item.label}
                   </Link>
@@ -70,84 +73,76 @@ export function Footer({ settings, className }: { settings: Settings | null; cla
 
           {/* Contact */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-foreground">Kontak</h3>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <MessageCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                <span>
-                  {s?.whatsappNumber ? `WhatsApp: ${s.whatsappNumber}` : "Nomor WhatsApp akan diperbarui segera"}
-                </span>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Kontak
+            </h3>
+            <ul className="space-y-2.5 text-sm text-foreground/80">
+              <li>
+                {s?.whatsappNumber
+                  ? `WhatsApp: ${s.whatsappNumber}`
+                  : "Nomor WhatsApp akan diperbarui"}
               </li>
-              <li className="flex items-start gap-2">
-                <Mail className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                <span>{s?.contactEmail || "Email akan diperbarui segera"}</span>
+              <li>{s?.contactEmail || "Email akan diperbarui"}</li>
+              <li className="flex items-start gap-1.5">
+                <MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+                <span>{s?.address || "Alamat akan diperbarui"}</span>
               </li>
-              <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                <span>{s?.address || "Alamat akan diperbarui segera"}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Clock className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                <span>{s?.operationalHours || "Jam operasional akan diperbarui segera"}</span>
+              <li className="flex items-start gap-1.5">
+                <Clock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+                <span>{s?.operationalHours || "Jam operasional akan diperbarui"}</span>
               </li>
             </ul>
           </div>
 
-          {/* Social */}
+          {/* Marketplace */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-foreground">Media Sosial</h3>
-            <div className="flex flex-wrap gap-3">
-              {s?.instagramUrl ? (
-                <a
-                  href={s.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground transition-colors hover:border-primary hover:text-primary"
-                  aria-label="Instagram"
-                >
-                  <Instagram className="h-5 w-5" />
-                </a>
-              ) : (
-                <span className="grid h-10 w-10 place-items-center rounded-full border border-border bg-muted text-muted-foreground/60" aria-hidden>
-                  <Instagram className="h-5 w-5" />
-                </span>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Belanja
+            </h3>
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                {s?.shopeeStoreUrl ? (
+                  <a
+                    href={s.shopeeStoreUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-foreground/80 transition-colors hover:text-primary"
+                  >
+                    <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" />
+                    Belanja di Shopee
+                  </a>
+                ) : (
+                  <span className="text-foreground/60">Toko Shopee segera hadir</span>
+                )}
+              </li>
+              {s?.tokopediaStoreUrl && (
+                <li>
+                  <a
+                    href={s.tokopediaStoreUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-foreground/80 transition-colors hover:text-primary"
+                  >
+                    <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" />
+                    Belanja di Tokopedia
+                  </a>
+                </li>
               )}
-              {s?.facebookUrl ? (
+              <li>
                 <a
-                  href={s.facebookUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground transition-colors hover:border-primary hover:text-primary"
-                  aria-label="Facebook"
+                  href={`mailto:${s?.contactEmail || "#"}`}
+                  className="inline-flex items-center gap-1.5 text-foreground/80 transition-colors hover:text-primary"
                 >
-                  <Facebook className="h-5 w-5" />
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                  Hubungi via Email
                 </a>
-              ) : (
-                <span className="grid h-10 w-10 place-items-center rounded-full border border-border bg-muted text-muted-foreground/60" aria-hidden>
-                  <Facebook className="h-5 w-5" />
-                </span>
-              )}
-              {s?.tiktokUrl ? (
-                <a
-                  href={s.tiktokUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground transition-colors hover:border-primary hover:text-primary"
-                  aria-label="TikTok"
-                >
-                  <span className="text-xs font-bold">TT</span>
-                </a>
-              ) : (
-                <span className="grid h-10 w-10 place-items-center rounded-full border border-border bg-muted text-muted-foreground/60" aria-hidden>
-                  <span className="text-xs font-bold">TT</span>
-                </span>
-              )}
-            </div>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="mt-10 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-          {s?.footerText || "© 2026 Dapur Ayam. Semua hak cipta dilindungi."}
+        <div className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">
+          {s?.footerText || "© 2026 Dapur Ayam. Fresh by Order · Tanpa MSG · Tanpa Pengawet."}
         </div>
       </div>
     </footer>

@@ -1,9 +1,23 @@
 import Link from "next/link";
-import { Package, Newspaper, CheckCircle2, FileEdit, Eye, EyeOff } from "lucide-react";
+import {
+  Package,
+  Newspaper,
+  CheckCircle2,
+  FileEdit,
+  Eye,
+  EyeOff,
+  ShoppingCart,
+  Clock,
+} from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_COLORS,
+  formatCurrency,
+} from "@/lib/order-display";
 
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
@@ -24,6 +38,9 @@ export default async function DashboardPage() {
     draftArticles,
     recentProducts,
     recentArticles,
+    totalOrders,
+    pendingOrders,
+    recentOrders,
   ] = await Promise.all([
     db.product.count(),
     db.product.count({ where: { isActive: true } }),
@@ -41,9 +58,28 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       include: { category: true },
     }),
+    db.order.count(),
+    db.order.count({ where: { status: "PENDING" } }),
+    db.order.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      include: { items: true },
+    }),
   ]);
 
   const stats = [
+    {
+      label: "Total Pesanan",
+      value: totalOrders,
+      icon: ShoppingCart,
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      label: "Pesanan Menunggu",
+      value: pendingOrders,
+      icon: Clock,
+      color: "bg-amber-500/10 text-amber-700",
+    },
     {
       label: "Total Produk",
       value: totalProducts,
@@ -89,11 +125,11 @@ export default async function DashboardPage() {
           Dashboard
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ringkasan aktivitas dan konten Dapur Ayam.
+          Ringkasan aktivitas pesanan, produk, dan konten Dapur Ayam.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -107,7 +143,9 @@ export default async function DashboardPage() {
                 <p className="mt-2 text-xs text-muted-foreground">{stat.label}</p>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                <p className="text-2xl font-bold text-foreground tabular-nums">
+                  {stat.value}
+                </p>
               </CardContent>
             </Card>
           );
@@ -115,6 +153,64 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Recent Orders */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4 text-primary" />
+              Pesanan Terbaru
+            </CardTitle>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/admin/pesanan">Lihat Semua</Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {recentOrders.length === 0 ? (
+              <div className="text-center py-6">
+                <ShoppingCart className="mx-auto mb-2 h-10 w-10 text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">Belum ada pesanan.</p>
+                <p className="mt-1 text-xs text-muted-foreground/80">
+                  Pesanan yang masuk melalui website akan muncul di sini secara
+                  otomatis.
+                </p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {recentOrders.map((o) => (
+                  <li
+                    key={o.id}
+                    className="flex items-center justify-between gap-3 py-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/admin/pesanan/${o.id}`}
+                        className="text-sm font-medium text-foreground hover:text-primary"
+                      >
+                        <span className="font-mono text-xs text-muted-foreground mr-2">
+                          {o.orderNumber}
+                        </span>
+                        {o.customerName}
+                      </Link>
+                      <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                        {o.totalItems} item · {formatCurrency(o.totalAmount)} ·{" "}
+                        {formatDate(o.createdAt)}
+                      </p>
+                    </div>
+                    <Badge
+                      className={`text-xs border ${
+                        ORDER_STATUS_COLORS[o.status] || ""
+                      }`}
+                      variant="outline"
+                    >
+                      {ORDER_STATUS_LABELS[o.status] || o.status}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Produk Terbaru</CardTitle>

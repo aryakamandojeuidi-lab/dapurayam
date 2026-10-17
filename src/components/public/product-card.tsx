@@ -47,7 +47,7 @@ export function ProductCard({ product, whatsappNumber, className }: Props) {
           </div>
         )}
         {product.category && (
-          <Badge className="absolute left-3 top-3 bg-background/90 text-foreground hover:bg-background/90">
+          <Badge className="absolute left-3 top-3 bg-background/95 text-foreground hover:bg-background/95">
             {product.category.name}
           </Badge>
         )}
@@ -59,13 +59,13 @@ export function ProductCard({ product, whatsappNumber, className }: Props) {
           </h3>
         </Link>
         {product.shortDescription && (
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
             {product.shortDescription}
           </p>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {product.price ? (
-            <span className="font-semibold text-primary">
+            <span className="font-semibold text-primary tabular-nums">
               Rp {product.price.toLocaleString("id-ID")}
             </span>
           ) : (

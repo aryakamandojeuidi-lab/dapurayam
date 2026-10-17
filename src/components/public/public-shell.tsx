@@ -27,6 +27,8 @@ export async function PublicShell({
         facebookUrl: settings.facebookUrl,
         tiktokUrl: settings.tiktokUrl,
         footerText: settings.footerText,
+        shopeeStoreUrl: settings.shopeeStoreUrl,
+        tokopediaStoreUrl: settings.tokopediaStoreUrl,
       }
     : null;
 

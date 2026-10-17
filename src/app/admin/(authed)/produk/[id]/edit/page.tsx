@@ -66,6 +66,9 @@ export default async function EditProductPage({ params }: Props) {
           isActive: product.isActive,
           isFeatured: product.isFeatured,
           featuredOrder: product.featuredOrder,
+          shopeeUrl: product.shopeeUrl,
+          tokopediaUrl: product.tokopediaUrl,
+          websiteOrderEnabled: product.websiteOrderEnabled,
         }}
         categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         submitLabel="Simpan Perubahan"

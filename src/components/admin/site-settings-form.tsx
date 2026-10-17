@@ -26,6 +26,10 @@ type Props = {
     footerText: string | null;
     heroHeadline: string | null;
     heroSubtext: string | null;
+    shopeeStoreUrl: string | null;
+    tokopediaStoreUrl: string | null;
+    positioningLabel: string | null;
+    freshnessNote: string | null;
   };
 };
 
@@ -47,6 +51,10 @@ export function SiteSettingsForm({ initialData }: Props) {
     footerText: initialData.footerText || "",
     heroHeadline: initialData.heroHeadline || "",
     heroSubtext: initialData.heroSubtext || "",
+    shopeeStoreUrl: initialData.shopeeStoreUrl || "",
+    tokopediaStoreUrl: initialData.tokopediaStoreUrl || "",
+    positioningLabel: initialData.positioningLabel || "",
+    freshnessNote: initialData.freshnessNote || "",
   });
 
   const set = (key: keyof typeof data, value: string) => {
@@ -188,6 +196,71 @@ export function SiteSettingsForm({ initialData }: Props) {
               onChange={(e) => set("tiktokUrl", e.target.value)}
               placeholder="https://tiktok.com/@..."
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Marketplace</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <Label htmlFor="shopeeStoreUrl">URL Toko Shopee</Label>
+            <Input
+              id="shopeeStoreUrl"
+              value={data.shopeeStoreUrl}
+              onChange={(e) => set("shopeeStoreUrl", e.target.value)}
+              placeholder="https://shopee.co.id/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Link ke toko resmi Dapur Ayam di Shopee. Tombol "Belanja di Shopee"
+              akan tampil di seluruh halaman setelah URL ini diisi.
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="tokopediaStoreUrl">URL Toko Tokopedia</Label>
+            <Input
+              id="tokopediaStoreUrl"
+              value={data.tokopediaStoreUrl}
+              onChange={(e) => set("tokopediaStoreUrl", e.target.value)}
+              placeholder="https://www.tokopedia.com/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Opsional — link toko di Tokopedia, ditampilkan di halaman Kontak.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Positioning Brand</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <Label htmlFor="positioningLabel">Label Positioning (di Beranda)</Label>
+            <Input
+              id="positioningLabel"
+              value={data.positioningLabel}
+              onChange={(e) => set("positioningLabel", e.target.value)}
+              placeholder="Olahan Ayam Premium Fresh by Order"
+            />
+            <p className="text-xs text-muted-foreground">
+              Label kecil yang muncul di bagian atas hero section beranda.
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="freshnessNote">Catatan Freshness</Label>
+            <Input
+              id="freshnessNote"
+              value={data.freshnessNote}
+              onChange={(e) => set("freshnessNote", e.target.value)}
+              placeholder="Fresh Made by Order · Tanpa MSG · Tanpa Pengawet"
+            />
+            <p className="text-xs text-muted-foreground">
+              Teks pendek yang ditonjolkan di hero beranda, di bawah subtext.
+            </p>
           </div>
         </CardContent>
       </Card>

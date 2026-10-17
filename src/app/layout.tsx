@@ -17,25 +17,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Dapur Ayam — Nugget Ayam Praktis untuk Momen Makan Bersama",
+    default: "Dapur Ayam — Olahan Ayam Premium Fresh by Order",
     template: "%s — Dapur Ayam",
   },
   description:
-    "Dapur Ayam menghadirkan produk olahan ayam berkualitas yang praktis untuk dinikmati kapan saja. Nugget, ayam bumbu, dan ayam ungkep siap masak untuk keluarga Anda.",
+    "Dapur Ayam menghadirkan produk olahan ayam premium yang dibuat fresh by order — tanpa MSG, tanpa pengawet. Bahan pilihan, resep racikan, dan proses terkontrol untuk standar hidangan kelas atas.",
   keywords: [
     "dapur ayam",
-    "nugget ayam",
-    "ayam bumbu",
+    "nugget ayam premium",
+    "ayam bumbu premium",
     "ayam ungkep",
     "chicken nugget",
-    "olahan ayam",
-    "ayam siap masak",
+    "fresh by order",
+    "olahan ayam tanpa msg",
+    "olahan ayam tanpa pengawet",
+    "ayam siap masak premium",
   ],
   authors: [{ name: "Dapur Ayam" }],
   openGraph: {
-    title: "Dapur Ayam — Nugget Ayam Praktis untuk Momen Makan Bersama",
+    title: "Dapur Ayam — Olahan Ayam Premium Fresh by Order",
     description:
-      "Nikmati produk olahan ayam berkualitas yang siap diolah kapan saja. Praktis, lezat, dan dibuat dengan bahan pilihan.",
+      "Produk olahan ayam premium yang dibuat fresh by order — tanpa MSG, tanpa pengawet. Bahan pilihan, resep racikan, dan proses terkontrol untuk Anda yang menuntut standar tinggi.",
     siteName: "Dapur Ayam",
     type: "website",
     locale: "id_ID",
@@ -44,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Dapur Ayam",
     description:
-      "Nugget Ayam Praktis untuk Momen Makan Bersama — produk olahan ayam berkualitas yang siap diolah.",
+      "Olahan Ayam Premium Fresh by Order — tanpa MSG, tanpa pengawet, dibuat setelah pesanan dikonfirmasi.",
   },
   robots: {
     index: true,
