@@ -134,12 +134,12 @@ export default async function ProductDetailPage({ params }: Props) {
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
             {/* Product image */}
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-secondary">
               {product.imageUrl ? (
                 <img
                   src={product.imageUrl}
                   alt={product.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                 />
               ) : (
                 <div className="grid h-full w-full place-items-center text-muted-foreground">

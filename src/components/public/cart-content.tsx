@@ -72,7 +72,7 @@ export function CartContent() {
                         <img
                           src={item.productImageUrl}
                           alt={item.productName}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       ) : (
                         <div className="grid h-full w-full place-items-center text-muted-foreground">

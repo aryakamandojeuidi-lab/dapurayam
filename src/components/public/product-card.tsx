@@ -31,14 +31,14 @@ export function ProductCard({ product, whatsappNumber, className }: Props) {
     >
       <Link
         href={`/produk/${product.slug}`}
-        className="relative block aspect-[4/3] overflow-hidden bg-secondary"
+        className="relative block aspect-[3/4] overflow-hidden bg-secondary"
         aria-label={`Lihat detail ${product.name}`}
       >
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         ) : (

@@ -278,3 +278,52 @@ Stage Summary:
 - Komposisi + storage instructions diisi sesuai info di foto marketing material (mention bahan utama + tanpa MSG + tanpa pengawet + simpan di freezer)
 - 0 lint error, semua route 200 OK
 
+
+---
+Task ID: DapurAyam-Iteration7-PhotoAspectRatioFix
+Agent: main (Super Z)
+Task: Perbaiki foto produk biar tidak terpotong/gepeng — sesuaikan dengan rasio asli foto.
+
+Work Log:
+- Check dimensi asli 4 foto produk via sharp:
+  - bumbu-rujak.jpg: 1254×1254 (square, rasio 1:1)
+  - bumbu-bali.jpg: 1024×1536 (portrait, rasio 2:3 / 0.667)
+  - nugget-keju.jpg: 1024×1536 (portrait, rasio 2:3 / 0.667)
+  - bumbu-ungkep.jpg: 1024×1536 (portrait, rasio 2:3 / 0.667)
+- Masalah: foto-foto ini dipasang di container dengan aspect-[4/3] (landscape) dan aspect-square (1:1) + object-cover → foto portrait 2:3 terpotong di atas-bawah, foto square 1:1 terpotong di samping saat container landscape
+- Solusi: ganti rasio container ke aspect-[3/4] (portrait) + object-contain → foto tampil utuh dengan padding background, layout tetap konsisten
+- Update src/components/public/product-card.tsx:
+  - Container: aspect-[4/3] → aspect-[3/4]
+  - Image: object-cover → object-contain
+  - Hover scale-105 transition tetap dipertahankan
+- Update src/app/produk/[slug]/page.tsx (product detail):
+  - Container: aspect-square → aspect-[3/4]
+  - Image: object-cover → object-contain
+- Update src/components/public/cart-content.tsx (cart thumbnail):
+  - Image: object-cover → object-contain (container 80×80 square tetap, foto fit dengan padding)
+- Update src/components/public/checkout-content.tsx (checkout summary thumbnail):
+  - Image: object-cover → object-contain (container 56×56 square tetap, foto fit dengan padding)
+
+Verifikasi via Agent Browser:
+- Homepage /produk: 4 produk tampil dengan foto utuh (tidak terpotong), konsisten dalam container 3:4 portrait
+- /produk/ayam-bumbu-rujak: foto square 1:1 tampil penuh dengan padding atas-bawah di container 590×787 (3:4)
+- /produk/chicken-nugget: foto portrait 2:3 tampil penuh fill tinggi container
+- Keranjang: thumbnail 80×80 square dengan object-contain → foto portrait tampil utuh dengan padding kiri-kanan
+- Mobile 390px: tidak ada horizontal overflow (scrollWidth - clientWidth = 0) di catalog dan detail page
+- VLM verification: "Yes. The photos are displayed fully without being cropped." — all 4 cards show complete promotional graphic
+
+Files changed:
+- src/components/public/product-card.tsx (aspect 4/3 → 3/4, object-cover → object-contain)
+- src/app/produk/[slug]/page.tsx (aspect-square → aspect-[3/4], object-cover → object-contain)
+- src/components/public/cart-content.tsx (object-cover → object-contain)
+- src/components/public/checkout-content.tsx (object-cover → object-contain)
+
+Stage Summary:
+- Semua foto produk (yang punya rasio campuran: 1 square + 3 portrait) sekarang tampil UTUH tanpa terpotong atau gepeng
+- Container 3:4 portrait dipilih karena mayoritas foto adalah portrait (2:3), dan 3:4 cukup dekat dengan rasio asli sehingga padding minimal
+- Foto square (bumbu-rujak) tampil dengan padding atas-bawah — masih terlihat profesional dengan background secondary (cream)
+- Foto portrait (bumbu-bali, nugget-keju, bumbu-ungkep) tampil dengan padding kiri-kanan minimal (karena 2:3 hanya sedikit lebih portrait dari 3:4)
+- Thumbnail di cart & checkout juga menggunakan object-contain agar tidak terpotong
+- Mobile responsive: tidak ada overflow, layout tetap rapi
+- 0 lint error, semua route 200 OK
+

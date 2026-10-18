@@ -226,7 +226,7 @@ export function CheckoutContent() {
                           <img
                             src={item.productImageUrl}
                             alt={item.productName}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                           />
                         ) : null}
                       </div>
