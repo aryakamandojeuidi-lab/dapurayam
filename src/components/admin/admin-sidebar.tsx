@@ -8,7 +8,6 @@ import {
   FolderTree,
   Newspaper,
   Settings,
-  Drumstick,
   LogOut,
   ShoppingCart,
 } from "lucide-react";
@@ -40,9 +39,13 @@ export function AdminSidebar({ userName, userEmail }: Props) {
   return (
     <aside className="hidden w-64 flex-shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:flex-col">
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
-        <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-          <Drumstick className="h-5 w-5" />
-        </span>
+        <img
+          src="/logofav.jpg"
+          alt="Dapur Ayam logo"
+          width={36}
+          height={36}
+          className="h-9 w-9 rounded-lg object-cover"
+        />
         <div>
           <p className="text-sm font-bold leading-tight text-sidebar-foreground">
             Dapur Ayam

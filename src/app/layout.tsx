@@ -34,6 +34,14 @@ export const metadata: Metadata = {
     "ayam siap masak premium",
   ],
   authors: [{ name: "Dapur Ayam" }],
+  icons: {
+    icon: [
+      { url: "/logofav.jpg", sizes: "any" },
+      { url: "/logo.svg", type: "image/svg+xml" },
+    ],
+    apple: "/logofav.jpg",
+    shortcut: "/logofav.jpg",
+  },
   openGraph: {
     title: "Dapur Ayam — Olahan Ayam Premium Fresh by Order",
     description:

@@ -61,80 +61,99 @@ async function main() {
   // --- Products ---
   const products = [
     {
-      name: "Ayam Bumbu Rujak",
+      name: "Ayam Pejantan Bumbu Rujak",
       slug: "ayam-bumbu-rujak",
       description:
-        "Potongan ayam yang dibumbui rempah khas rujak dengan perpaduan rasa pedas manis yang menggugah selera. Praktis untuk langsung digoreng atau dipanggang.",
-      shortDescription: "Ayam berbumbu rujak pedas manis, siap masak.",
-      price: null,
-      packageSize: null,
-      imageUrl:
-        "https://placehold.co/800x600/F5C518/3B2A1A?text=Ayam+Bumbu+Rujak",
-      ingredients: null,
-      storageInstructions: null,
+        "Ayam Pejantan Bumbu Rujak — perpaduan rasa pedas, gurih, dan segar yang khas bumbu rujak Nusantara. Dibuat dari ayam pejantan pilihan dengan daging yang lebih padat dan kenyal, dibumbui rempah pilihan tanpa MSG dan tanpa pengawet. Diproses fresh by order setelah pesanan dikonfirmasi. Tinggal goreng dan siap dinikmati dengan nasi hangat.",
+      shortDescription:
+        "Pedas, gurih, segar — bumbu rujak khas Nusantara. Fresh by order.",
+      price: 35000,
+      packageSize: "±200-230 gr / pack",
+      imageUrl: "/uploads/products/bumbu-rujak.jpg",
+      ingredients:
+        "Ayam pejantan, bumbu rujak (cabai, gula merah, terasi, asam jawa, kacang), bawang putih, bawang merah, garam, rempah pilihan. Tanpa MSG, tanpa pengawet.",
+      storageInstructions:
+        "Simpan di freezer (-18°C atau lebih dingin) hingga akan dimasak. Setelah dicairkan, masak segera dan jangan dibekukan ulang.",
       servingSuggestion:
         "Goreng dalam minyak panas hingga keemasan, sajikan dengan nasi hangat dan lalapan.",
       categorySlug: "ayam-bumbu",
       isActive: true,
       isFeatured: true,
       featuredOrder: 1,
+      shopeeUrl: "",
+      tokopediaUrl: "",
+      websiteOrderEnabled: true,
     },
     {
-      name: "Ayam Penjantan Bumbu Bali",
+      name: "Ayam Pejantan Bumbu Bali",
       slug: "ayam-penjantan-bumbu-bali",
       description:
-        "Ayam penjantan dengan bumbu Bali khas yang kaya rempah. Karakter daging ayam penjantan yang padat berpadu dengan bumbu pedas khas Pulau Dewata.",
-      shortDescription: "Ayam penjantan berbumbu Bali pedas khas.",
-      price: null,
-      packageSize: null,
-      imageUrl:
-        "https://placehold.co/800x600/F5C518/3B2A1A?text=Ayam+Penjantan+Bumbu+Bali",
-      ingredients: null,
-      storageInstructions: null,
+        "Ayam Pejantan Bumbu Bali — karakter daging ayam pejantan yang padat berpadu dengan bumbu Bali kaya rempah yang pedas dan harum. Diproses fresh by order tanpa MSG dan tanpa pengawet. Cocok digoreng atau dipanggang, sajikan dengan sambal matah untuk hidangan khas Pulau Dewata di rumah Anda.",
+      shortDescription: "Praktis, gurih, kaya rempah — bumbu Bali khas Pulau Dewata.",
+      price: 32000,
+      packageSize: "±200-230 gr / pack",
+      imageUrl: "/uploads/products/bumbu-bali.jpg",
+      ingredients:
+        "Ayam pejantan, bumbu Bali (cabai merah, bawang merah, bawang putih, kunyit, jahe, lengkuas, serai, daun jeruk), garam, rempah pilihan. Tanpa MSG, tanpa pengawet.",
+      storageInstructions:
+        "Simpan di freezer (-18°C atau lebih dingin) hingga akan dimasak. Setelah dicairkan, masak segera dan jangan dibekukan ulang.",
       servingSuggestion:
         "Cocok digoreng atau dipanggang. Sajikan dengan sambal matah.",
       categorySlug: "ayam-bumbu",
       isActive: true,
       isFeatured: true,
       featuredOrder: 2,
+      shopeeUrl: "",
+      tokopediaUrl: "",
+      websiteOrderEnabled: true,
     },
     {
-      name: "Chicken Nugget",
+      name: "Chicken Nugget Isi Keju",
       slug: "chicken-nugget",
       description:
-        "Nugget ayam premium dengan tekstur lembut dan rasa gurih. Praktis untuk camilan, lauk, atau bekal. Tinggal goreng sebentar dan siap disajikan.",
-      shortDescription: "Nugget ayam lembut dan gurih, praktis digoreng.",
-      price: null,
-      packageSize: null,
-      imageUrl:
-        "https://placehold.co/800x600/F5C518/3B2A1A?text=Chicken+Nugget",
-      ingredients: null,
-      storageInstructions: null,
+        "Chicken Nugget Isi Keju Easy Melt — nugget ayam premium dengan isi keju yang lumer saat digigit. Dibuat dari daging ayam pilihan, lapisan luar yang renyah dan isi keju yang creamy. Tanpa MSG, tanpa pengawet, tanpa filler sintetis. Diproses fresh by order, tinggal goreng 3-5 menit dan siap disajikan sebagai camilan, lauk, atau bekal.",
+      shortDescription:
+        "Nugget ayam premium isi keju easy melt — gurih, lumer, anti MSG.",
+      price: 30000,
+      packageSize: "250 gr / pack",
+      imageUrl: "/uploads/products/nugget-keju.jpg",
+      ingredients:
+        "Daging ayam pilihan, keju easy melt, tepung premium, bumbu alami, telur. Tanpa MSG, tanpa pengawet, tanpa pengawet sintetis.",
+      storageInstructions:
+        "Simpan di freezer (-18°C atau lebih dingin). Goreng langsung dari kondisi beku, tidak perlu dicairkan terlebih dahulu. Setelah kemasan dibuka, konsumsi dalam waktu 1 bulan.",
       servingSuggestion:
         "Goreng dalam minyak panas 3-5 menit hingga keemasan. Sajikan dengan saus sambal atau mayonnaise.",
       categorySlug: "nugget",
       isActive: true,
       isFeatured: true,
       featuredOrder: 3,
+      shopeeUrl: "",
+      tokopediaUrl: "",
+      websiteOrderEnabled: true,
     },
     {
-      name: "Ayam Penjantan Bumbu Ungkep",
+      name: "Ayam Pejantan Bumbu Ungkep",
       slug: "ayam-penjantan-bumbu-ungkep",
       description:
-        "Ayam penjantan yang sudah diungkep dengan bumbu rempah pilihan. Tinggal goreng sebentar untuk hasil yang empuk dan bumbu meresap hingga ke dalam.",
-      shortDescription: "Ayam penjantan diungkep dengan bumbu rempah pilihan.",
-      price: null,
-      packageSize: null,
-      imageUrl:
-        "https://placehold.co/800x600/F5C518/3B2A1A?text=Ayam+Penjantan+Ungkep",
-      ingredients: null,
-      storageInstructions: null,
+        "Ayam Pejantan Bumbu Ungkep — ayam pejantan pilihan yang sudah diungkep dengan bumbu rempah alami hingga meresap sempurna. Setiap pack berisi 1 potong paha + 1 potong dada. Tinggal goreng 2-3 menit untuk hasil empuk, gurih, dan bumbu meresap hingga ke dalam. Tanpa MSG, tanpa pengawet. Diproses fresh by order.",
+      shortDescription:
+        "Empuk, gurih, meresap — ayam ungkep praktis tinggal goreng.",
+      price: 30000,
+      packageSize: "1 paha + 1 dada / pack",
+      imageUrl: "/uploads/products/bumbu-ungkep.jpg",
+      ingredients:
+        "Ayam pejantan (paha + dada), bumbu ungkep (bawang putih, bawang merah, ketumbar, kunyit, jahe, daun salam, serai), garam, rempah pilihan. Tanpa MSG, tanpa pengawet.",
+      storageInstructions:
+        "Simpan di freezer (-18°C atau lebih dingin) hingga akan dimasak. Setelah dicairkan, masak segera dan jangan dibekukan ulang.",
       servingSuggestion:
         "Goreng 2-3 menit setelah diungkep. Sajikan hangat dengan nasi dan sambal.",
       categorySlug: "ayam-ungkep",
       isActive: true,
       isFeatured: true,
       featuredOrder: 4,
+      shopeeUrl: "",
+      tokopediaUrl: "",
+      websiteOrderEnabled: true,
     },
   ];
   for (const p of products) {

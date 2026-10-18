@@ -198,3 +198,83 @@ Stage Summary:
 - Premium positioning brand: "Fresh by Order" + "Tanpa MSG" + "Tanpa Pengawet" + "Kelas Atas" applied throughout
 - Multi-kanal pembelian: Website (cart + checkout) | Shopee (per-product URL + global store URL) | WhatsApp (consultation with auto-message)
 
+
+---
+Task ID: DapurAyam-Iteration6-RealPhotosAndLogo
+Agent: main (Super Z)
+Task: Ganti placeholder produk dengan foto asli dari pemilik, pakai logofav.jpg sebagai logo brand + favicon.
+
+Work Log:
+- User mengunggah 5 file: logofav.jpg (logo Dapur Ayam by Serabites) + 4 foto produk asli (bumbu rujak, bumbu bali, nugget keju, bumbu ungkep)
+- Copy file dari /home/z/my-project/upload/ ke:
+  - /public/logofav.jpg (root, untuk favicon + brand)
+  - /public/uploads/products/bumbu-rujak.jpg
+  - /public/uploads/products/bumbu-bali.jpg
+  - /public/uploads/products/nugget-keju.jpg
+  - /public/uploads/products/bumbu-ungkep.jpg
+- Update src/app/layout.tsx metadata.icons → gunakan /logofav.jpg sebagai icon (fallback ke /logo.svg), apple touch icon, dan shortcut
+- Update src/components/public/navbar.tsx:
+  - Hapus import Drumstick icon (tidak dipakai lagi)
+  - Ganti span dengan Drumstick → <img src="/logofav.jpg"> dengan class h-9 w-9 rounded-lg object-cover
+  - Mobile sheet juga pakai logo image (32x32)
+- Update src/components/public/footer.tsx:
+  - Hapus import Drumstick
+  - Ganti span dengan Drumstick → <img src="/logofav.jpg">
+- Update src/components/admin/admin-sidebar.tsx:
+  - Hapus Drumstick dari imports
+  - Ganti span dengan Drumstick di header → <img src="/logofav.jpg"> 36x36
+- Update src/app/admin/login/page.tsx:
+  - Hapus Drumstick dari imports
+  - Ganti span dengan Drumstick di login header → <img src="/logofav.jpg"> 64x64 (lebih besar, shadow)
+- Update data produk via scripts/update-product-photos.ts (overwrite DB):
+  - Ayam Bumbu Rujak → "Ayam Pejantan Bumbu Rujak" (sesuai nama di foto) | Rp 35.000 | ±200-230 gr | /uploads/products/bumbu-rujak.jpg
+  - Ayam Penjantan Bumbu Bali → keep name | Rp 32.000 | ±200-230 gr | /uploads/products/bumbu-bali.jpg
+  - Chicken Nugget → "Chicken Nugget Isi Keju" (sesuai foto yang menunjukkan cheese-filled) | Rp 30.000 | 250 gr | /uploads/products/nugget-keju.jpg
+  - Ayam Penjantan Bumbu Ungkep → keep name | Rp 30.000 | 1 paha + 1 dada | /uploads/products/bumbu-ungkep.jpg
+  - Update description, shortDescription, ingredients, storageInstructions untuk semua produk sesuai info di foto (mention fresh by order, tanpa MSG, tanpa pengawet)
+- Update prisma/seed.ts dengan data produk baru (untuk konsistensi jika re-seed):
+  - Setiap produk sekarang punya price, packageSize, imageUrl lokal, ingredients, storageInstructions, shopeeUrl, tokopediaUrl, websiteOrderEnabled
+  - Slug tetap sama (tidak perluubah URL) — hanya nama, deskripsi, dan foto yang berubah
+
+Verifikasi via Agent Browser:
+- Homepage: navbar pakai logo Dapur Ayam (round badge dengan rooster), title "Dapur Ayam — Olahan Ayam Premium Fresh by Order", 4 produk card dengan nama baru + harga
+- /produk: list 4 produk dengan foto asli, harga, dan berat:
+  - Ayam Pejantan Bumbu Rujak Rp 35.000 ±200-230 gr
+  - Ayam Pejantan Bumbu Bali Rp 32.000 ±200-230 gr
+  - Chicken Nugget Isi Keju Rp 30.000 250 gr
+  - Ayam Pejantan Bumbu Ungkep Rp 30.000 1 paha + 1 dada
+- /produk/ayam-bumbu-rujak: foto asli + Harga Rp 35.000 + Kemasan ±200-230 gr + Subtotal Rp 35.000 + Tambah ke Keranjang + Beli Sekarang
+- /produk/chicken-nugget: foto asli + Harga Rp 30.000 + Kemasan 250 gr + Subtotal Rp 30.000
+- Favicon: <link rel="icon" href="/logofav.jpg"> verified via document.querySelectorAll
+- Admin login page: logo 64x64 di header (above "Dapur Ayam — Admin" heading)
+- Admin sidebar: logo 36x36 di header sidebar (above "Dapur Ayam / Admin Panel" text)
+- VLM audit: "AI-template feel significantly reduced" — pengganti placeholder kuning dengan foto asli + brand logo anchor design ke realitas
+
+Files changed:
+- src/app/layout.tsx (metadata.icons → logofav.jpg)
+- src/components/public/navbar.tsx (logo image di navbar + mobile sheet)
+- src/components/public/footer.tsx (logo image di footer brand)
+- src/components/admin/admin-sidebar.tsx (logo image di sidebar header)
+- src/app/admin/login/page.tsx (logo image di login header)
+- prisma/seed.ts (data produk baru: nama, harga, berat, foto, ingredients, storage)
+- DB updated via scripts/update-product-photos.ts
+
+Files created:
+- /public/logofav.jpg (logo + favicon)
+- /public/uploads/products/bumbu-rujak.jpg
+- /public/uploads/products/bumbu-bali.jpg
+- /public/uploads/products/nugget-keju.jpg
+- /public/uploads/products/bumbu-ungkep.jpg
+- scripts/update-product-photos.ts
+
+Stage Summary:
+- Foto produk asli (4 produk) sudah menggantikan placeholder kuning — tampilan kini jauh lebih profesional dengan appetite appeal yang kuat
+- Logo Dapur Ayam by Serabites (rooster badge) dipakai konsisten di: favicon, navbar (desktop + mobile), footer, admin sidebar, admin login page
+- Data produk lengkap dengan harga asli dari foto:
+  - Ayam Pejantan Bumbu Rujak: Rp 35.000 / ±200-230 gr
+  - Ayam Pejantan Bumbu Bali: Rp 32.000 / ±200-230 gr
+  - Chicken Nugget Isi Keju: Rp 30.000 / 250 gr
+  - Ayam Pejantan Bumbu Ungkep: Rp 30.000 / 1 paha + 1 dada
+- Komposisi + storage instructions diisi sesuai info di foto marketing material (mention bahan utama + tanpa MSG + tanpa pengawet + simpan di freezer)
+- 0 lint error, semua route 200 OK
+

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Drumstick, Loader2, Lock, Mail } from "lucide-react";
+import { Loader2, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,9 +47,13 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-secondary/60 to-background px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
-          <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground shadow">
-            <Drumstick className="h-6 w-6" />
-          </span>
+          <img
+            src="/logofav.jpg"
+            alt="Dapur Ayam logo"
+            width={64}
+            height={64}
+            className="h-16 w-16 rounded-2xl object-cover shadow"
+          />
           <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
             Dapur Ayam — Admin
           </h1>

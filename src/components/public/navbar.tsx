@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Drumstick, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -51,9 +51,13 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
           className="flex items-center gap-2.5"
           aria-label={`${businessName} beranda`}
         >
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Drumstick className="h-5 w-5" />
-          </span>
+          <img
+            src="/logofav.jpg"
+            alt={`${businessName || "Dapur Ayam"} logo`}
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-lg object-cover"
+          />
           <span className="text-lg font-bold tracking-tight text-foreground">
             {businessName || "Dapur Ayam"}
           </span>
@@ -101,9 +105,13 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
         <SheetContent side="right" className="w-[300px] sm:w-[360px]">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-                <Drumstick className="h-4 w-4" />
-              </span>
+              <img
+                src="/logofav.jpg"
+                alt={`${businessName || "Dapur Ayam"} logo`}
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-lg object-cover"
+              />
               {businessName || "Dapur Ayam"}
             </SheetTitle>
           </SheetHeader>

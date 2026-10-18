@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Drumstick, Mail, MapPin, Clock, ShoppingBag } from "lucide-react";
+import { Mail, MapPin, Clock, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Settings = {
@@ -40,9 +40,13 @@ export function Footer({ settings, className }: { settings: Settings | null; cla
           {/* Brand */}
           <div className="space-y-3">
             <Link href="/" className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-                <Drumstick className="h-4 w-4" />
-              </span>
+              <img
+                src="/logofav.jpg"
+                alt={`${s?.businessName || "Dapur Ayam"} logo`}
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-lg object-cover"
+              />
               <span className="font-bold text-foreground">
                 {s?.businessName || "Dapur Ayam"}
               </span>
