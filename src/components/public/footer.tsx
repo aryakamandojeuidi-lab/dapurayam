@@ -22,7 +22,9 @@ const NAV_ITEMS = [
   { label: "Beranda", href: "/" },
   { label: "Produk", href: "/produk" },
   { label: "Journal", href: "/journal" },
-  { label: "Tentang", href: "/tentang" },
+  { label: "Tentang Kami", href: "/tentang" },
+  { label: "Cara Pemesanan", href: "/#cara-pemesanan" },
+  { label: "FAQ", href: "/#faq" },
   { label: "Kontak", href: "/kontak" },
 ];
 

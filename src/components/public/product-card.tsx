@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Package } from "lucide-react";
+import { ArrowRight, Package, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { WhatsAppButton } from "@/components/public/whatsapp-button";
@@ -19,9 +19,10 @@ type Props = {
   };
   whatsappNumber: string;
   className?: string;
+  bestSeller?: boolean;
 };
 
-export function ProductCard({ product, whatsappNumber, className }: Props) {
+export function ProductCard({ product, whatsappNumber, className, bestSeller }: Props) {
   return (
     <div
       className={cn(
@@ -46,7 +47,14 @@ export function ProductCard({ product, whatsappNumber, className }: Props) {
             <Package className="h-10 w-10" />
           </div>
         )}
-        {product.category && (
+        {/* Top-left badges */}
+        {bestSeller && (
+          <Badge className="absolute left-3 top-3 gap-1 bg-primary text-primary-foreground hover:bg-primary">
+            <Star className="h-3 w-3 fill-current" />
+            Best Seller
+          </Badge>
+        )}
+        {!bestSeller && product.category && (
           <Badge className="absolute left-3 top-3 bg-background/95 text-foreground hover:bg-background/95">
             {product.category.name}
           </Badge>
@@ -63,22 +71,20 @@ export function ProductCard({ product, whatsappNumber, className }: Props) {
             {product.shortDescription}
           </p>
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-3 flex flex-wrap items-baseline gap-2">
           {product.price ? (
-            <span className="font-semibold text-primary tabular-nums">
+            <span className="text-lg font-bold text-primary tabular-nums">
               Rp {product.price.toLocaleString("id-ID")}
             </span>
           ) : (
             <span className="italic text-muted-foreground">Harga menyusul</span>
           )}
           {product.packageSize && (
-            <span className="rounded-md bg-secondary px-2 py-0.5">
-              {product.packageSize}
-            </span>
+            <span className="text-xs text-muted-foreground">· {product.packageSize}</span>
           )}
         </div>
         <div className="mt-4 flex items-center gap-2">
-          <Button asChild variant="outline" size="sm" className="flex-1 gap-1.5">
+          <Button asChild variant="outline" size="sm" className="flex-1 gap-1.5 rounded-full">
             <Link href={`/produk/${product.slug}`}>
               Lihat Detail
               <ArrowRight className="h-3.5 w-3.5" />
@@ -89,6 +95,7 @@ export function ProductCard({ product, whatsappNumber, className }: Props) {
             message={buildProductOrderMessage(product.name)}
             label="Pesan"
             size="sm"
+            className="rounded-full"
           />
         </div>
       </div>

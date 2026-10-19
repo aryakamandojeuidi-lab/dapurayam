@@ -23,7 +23,7 @@ const STEPS = [
 
 export function OrderingSteps() {
   return (
-    <section className="bg-background py-20 md:py-28">
+    <section id="cara-pemesanan" className="bg-background py-20 md:py-28 scroll-mt-20">
       <div className="mx-auto max-w-5xl px-4 md:px-6">
         <div className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">

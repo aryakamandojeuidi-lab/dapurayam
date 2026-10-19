@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -18,8 +18,9 @@ type Props = {
 const NAV_ITEMS = [
   { label: "Beranda", href: "/" },
   { label: "Produk", href: "/produk" },
-  { label: "Journal", href: "/journal" },
-  { label: "Tentang", href: "/tentang" },
+  { label: "Tentang Kami", href: "/tentang" },
+  { label: "Cara Pemesanan", href: "/#cara-pemesanan" },
+  { label: "FAQ", href: "/#faq" },
   { label: "Kontak", href: "/kontak" },
 ];
 
@@ -35,13 +36,16 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href.startsWith("/#")) return false; // anchor links
+    return pathname.startsWith(href);
+  };
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b border-border/60 bg-background/90 backdrop-blur transition-shadow",
+        "sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur transition-shadow",
         scrolled ? "shadow-sm" : "shadow-none",
       )}
     >
@@ -56,43 +60,55 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
             alt={`${businessName || "Dapur Ayam"} logo`}
             width={36}
             height={36}
-            className="h-9 w-9 rounded-lg object-cover"
+            className="h-9 w-9 rounded-lg object-cover ring-1 ring-primary/20"
           />
           <span className="text-lg font-bold tracking-tight text-foreground">
             {businessName || "Dapur Ayam"}
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Menu utama">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Menu utama">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive(item.href)
-                  ? "bg-secondary text-secondary-foreground"
-                  : "text-foreground/80 hover:bg-secondary/60 hover:text-foreground",
+                  ? "text-primary"
+                  : "text-foreground/80 hover:text-primary",
               )}
             >
               {item.label}
+              {isActive(item.href) && (
+                <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-primary" />
+              )}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden sm:inline-flex"
+            aria-label="Cari"
+          >
+            <Search className="h-5 w-5" />
+          </Button>
           <CartBadge className="hidden sm:inline-flex" />
           <div className="hidden md:block">
             <WhatsAppButton
               number={whatsappNumber}
-              label="Pesan"
+              label="Pesan Sekarang"
               size="default"
+              className="gap-1.5"
             />
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="lg:hidden"
             onClick={() => setOpen(true)}
             aria-label="Buka menu"
           >
@@ -124,8 +140,8 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
                 className={cn(
                   "rounded-md px-3 py-3 text-base font-medium transition-colors",
                   isActive(item.href)
-                    ? "bg-secondary text-secondary-foreground"
-                    : "text-foreground/80 hover:bg-secondary/60 hover:text-foreground",
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground/80 hover:bg-secondary hover:text-primary",
                 )}
               >
                 {item.label}
@@ -136,7 +152,7 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
             <CartBadge className="w-full justify-center" />
             <WhatsAppButton
               number={whatsappNumber}
-              label="Pesan via WhatsApp"
+              label="Pesan Sekarang"
               className="w-full"
             />
           </div>

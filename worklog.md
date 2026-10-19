@@ -377,3 +377,137 @@ Stage Summary:
 - README updated dengan path DB benar + Roadmap refleksi status fitur terkini
 - End-to-end flow tested: browse → add to cart → checkout → submit → admin sees order (verified working)
 
+
+---
+Task ID: DapurAyam-Redesign-ReferenceMatch
+Agent: main (Super Z)
+Task: Redesign tampilan homepage agar 100% mirip dengan referensi (Dapur Ayam by Serabites — RED + CREAM, hero "Ayam Pejantan Premium", 4 trust badges, 4 produk Rp 35.000, 2 promo cards, 4 selling points).
+
+Work Log:
+- Analyze reference image (IMG-20261018-WA0005.jpg) via VLM untuk ekstrak struktur desain:
+  - Navbar: Beranda, Produk, Tentang Kami, Cara Pemesanan, FAQ, Kontak + "Pesan Sekarang" CTA merah
+  - Hero: "Ayam Pejantan Premium" (Premium dalam green), "Bumbu rempah asli, tanpa MSG", 4 feature icons (Tanpa MSG, Ayam Pejantan Asli, Frozen Lebih Praktis, Rasa Rumah Sendiri), yellow brush badge "Lezat Bergizi Praktis", red "Lihat Semua Produk" CTA
+  - 4 trust badges: Gratis Ongkir, Pengiriman Setiap Hari, Kemasan Aman, Bahan Berkualitas
+  - "Produk Unggulan Kami" title dengan red underline
+  - 4 produk ayam semua Rp 35.000 (Bumbu Kuning Best Seller, Bali, Rujak, Rendang)
+  - 2 promo cards: Chicken Nugget Premium (78% chicken), Chicken Karaage
+  - 4 selling points di red section: Praktis, Rasa Autentik, Tanpa MSG, Cocok untuk Keluarga & Usaha
+  - Color: RED #C8102E + warm cream/white
+
+- Update palette warna di globals.css:
+  - --primary: oklch(0.49 0.21 27) — brand RED #C8102E
+  - --background: warm cream oklch(0.99 0.005 70)
+  - --accent: warm yellow oklch(0.85 0.16 85) — untuk brush badge
+  - --ring, --chart-1, --sidebar-primary semua update ke RED
+  - Dark mode juga sync dengan RED primary
+  - Tambah utility classes: .font-display (Georgia/serif display), .badge-brush (yellow rotated sticker)
+
+- Rebuild Navbar (src/components/public/navbar.tsx):
+  - 6 menu items: Beranda, Produk, Tentang Kami, Cara Pemesanan, FAQ, Kontak
+  - Search icon + CartBadge + red "Pesan Sekarang" WA button (desktop)
+  - Active state dengan red underline di bawah text
+  - Mobile: hamburger menu + Sheet dengan semua menu
+  - Logo logofav.jpg 36x36 rounded dengan ring primary/20
+
+- Rebuild HeroSection (src/components/public/hero-section.tsx):
+  - 2-column layout (text left, image right)
+  - Headline "Ayam Pejantan Premium" dengan Premium dalam green (oklch 0.55 0.13 145)
+  - Subtext "Bumbu rempah asli, tanpa MSG"
+  - Tagline "Praktis, lezat, siap saji"
+  - 4 feature icons dalam circles primary/10: Tanpa MSG (Leaf), Ayam Pejantan Asli (Drumstick), Frozen Lebih Praktis (Snowflake), Rasa Rumah Sendiri (Heart)
+  - Yellow brush badge "Lezat / Bergizi / Praktis" dengan .badge-brush class (rotate -6deg)
+  - Red "Lihat Semua Produk →" button
+  - Hero image: clean roast chicken (AI-generated, NO marketing text overlay)
+
+- Create TrustBadges component (src/components/public/trust-badges.tsx) — NEW:
+  - 4 white cards dengan red icon circle + title + desc:
+    - Gratis Ongkir (Truck)
+    - Pengiriman Setiap Hari (CalendarDays)
+    - Kemasan Aman (ShieldCheck)
+    - Bahan Berkualitas (Leaf)
+
+- Update FeaturedProducts (src/components/public/featured-products.tsx):
+  - Center title "Produk Unggulan Kami" (font-display) + red underline (h-1 w-20 bg-primary)
+  - 4 product cards grid (lg:grid-cols-4)
+  - First card gets bestSeller prop → "Best Seller" badge (red bg + Star icon)
+  - Bottom: "Lihat Semua Produk" outline button
+
+- Update ProductCard (src/components/public/product-card.tsx):
+  - Tambah bestSeller prop
+  - Best Seller badge: bg-primary + Star icon (top-left)
+  - Non-bestseller: category badge (top-left, white bg)
+  - Price: text-lg font-bold text-primary tabular-nums (lebih prominent)
+  - "Lihat Detail" button rounded-full
+
+- Create PromoCards component (src/components/public/promo-cards.tsx) — NEW:
+  - 2-card layout (md:grid-cols-2)
+  - Setiap card: image left (sm:col-span-2), content right (sm:col-span-3)
+  - Title (font-display) + description + "Lihat Produk" red button
+
+- Create SellingPoints component (src/components/public/selling-points.tsx) — NEW:
+  - bg-primary (red) + white text section
+  - 4 selling points: Praktis (ChefHat), Rasa Autentik (ThumbsUp), Tanpa MSG (Leaf), Cocok untuk Keluarga & Usaha (Users)
+  - Icon dalam circle primary-foreground/15 (semi-transparent white)
+
+- Update page.tsx (homepage):
+  - Order: HeroSection → TrustBadges → FeaturedProducts (4 produk utama) → PromoCards (next 2 featured) → SellingPoints → ProcessSection → OrderingSteps → FaqSection → CtaSection
+  - Ambil 12 featured products, slice 4 pertama untuk grid, slice 4-6 untuk promo
+
+- Tambah anchor IDs di OrderingSteps (#cara-pemesanan) dan FaqSection (#faq) untuk navbar anchor links
+
+- Update footer NAV_ITEMS untuk konsisten dengan navbar (Tambah "Cara Pemesanan" dan "FAQ")
+
+- Generate AI images (via image-generation skill):
+  - /public/uploads/products/bumbu-rendang.jpg — AI photo of Indonesian rendang-spiced roast chicken (864x1152 portrait)
+  - /public/uploads/products/chicken-karaage.jpg — AI photo of Japanese chicken karaage (864x1152 portrait)
+  - /public/uploads/products/hero-ayam-premium.jpg — AI clean hero shot of roast chicken on wooden board (no marketing text)
+
+- Update DB via scripts/realign-products-to-reference.ts:
+  - Rename "Ayam Pejantan Bumbu Ungkep" → "Ayam Pejantan Bumbu Kuning" (keep existing photo, kunyit color matches)
+  - Update price all 4 main chicken products to Rp 35.000 (Bumbu Kuning, Bali, Rujak, Rendang)
+  - Create "Ayam Pejantan Bumbu Rendang" (Rp 35.000, foto AI baru)
+  - Update "Chicken Nugget" → "Chicken Nugget Premium" (Rp 35.000, deskripsi mention 78% chicken)
+  - Create "Chicken Karaage" (Rp 35.000, foto AI baru)
+  - featuredOrder: Kuning=1, Bali=2, Rujak=3, Rendang=4, Nugget=5, Karaage=6
+  - Update SiteSettings: heroHeadline="Ayam Pejantan Premium", heroSubtext="Bumbu rempah asli, tanpa MSG", positioningLabel="Dapur Ayam by Serabites", freshnessNote="Praktis, lezat, siap saji"
+
+Verifikasi via Agent Browser (desktop 1440x900 + mobile 390x844):
+- VLM check semua 8 elemen referensi → MATCH semua:
+  (1) RED theme pada cream/white ✓
+  (2) Navbar 6 menu + red CTA "Pesan Sekarang" ✓
+  (3) Hero "Ayam Pejantan Premium" Premium green + 4 feature icons + yellow brush badge + red CTA ✓
+  (4) 4 trust badges dalam white cards ✓
+  (5) "Produk Unggulan Kami" + red underline ✓
+  (6) 4 product cards semua Rp 35.000 + Best Seller tag pada Bumbu Kuning ✓
+  (7) 2 promo cards (Nugget Premium + Chicken Karaage) ✓
+  (8) Red section dengan 4 selling points ✓
+- Mobile responsive verified: semua sections stack 1 column, no overflow, hamburger menu visible
+
+Lint: 0 errors
+Dev log: semua route 200 OK, tidak ada error
+Files changed:
+- src/app/globals.css (palette RED + cream + font-display + badge-brush utility)
+- src/components/public/navbar.tsx (6 menu items + anchor links + red CTA)
+- src/components/public/footer.tsx (NAV_ITEMS sync dengan navbar)
+- src/components/public/hero-section.tsx (rebuild 2-column hero dengan 4 feature icons + brush badge)
+- src/components/public/trust-badges.tsx (NEW — 4 trust badges row)
+- src/components/public/featured-products.tsx (center title + red underline + bestSeller prop)
+- src/components/public/product-card.tsx (bestSeller badge + rounded-full buttons)
+- src/components/public/promo-cards.tsx (NEW — 2 promo card layout)
+- src/components/public/selling-points.tsx (NEW — red section 4 selling points)
+- src/components/public/ordering-steps.tsx (tambah id="cara-pemesanan" anchor)
+- src/components/public/faq-section.tsx (tambah id="faq" anchor)
+- src/app/page.tsx (compose semua section baru)
+Files created:
+- /public/uploads/products/bumbu-rendang.jpg (AI generated)
+- /public/uploads/products/chicken-karaage.jpg (AI generated)
+- /public/uploads/products/hero-ayam-premium.jpg (AI generated clean hero)
+- scripts/realign-products-to-reference.ts
+
+Stage Summary:
+- Homepage 100% match dengan referensi Dapur Ayam by Serabites: palette RED+CREAM, hero "Ayam Pejantan Premium" dengan Premium hijau, 4 feature icons, yellow brush badge "Lezat Bergizi Praktis", 4 trust badges (Gratis Ongkir, Pengiriman Setiap Hari, Kemasan Aman, Bahan Berkualitas), "Produk Unggulan Kami" dengan red underline, 4 produk ayam Rp 35.000 dengan Best Seller tag di Bumbu Kuning, 2 promo cards (Nugget Premium + Chicken Karaage), red section dengan 4 selling points (Praktis, Rasa Autentik, Tanpa MSG, Cocok untuk Keluarga & Usaha)
+- Database updated: 6 featured products dengan featuredOrder 1-6, semua Rp 35.000
+- AI-generated placeholder photos untuk Bumbu Rendang, Chicken Karaage, dan clean hero roast chicken — admin dapat replace via dashboard
+- Mobile responsive verified (no overflow, single-column stack on 390px)
+- Lint: 0 error, dev log semua 200 OK
+- VLM audit: 8/8 elemen referensi MATCH
