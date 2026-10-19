@@ -511,3 +511,64 @@ Stage Summary:
 - Mobile responsive verified (no overflow, single-column stack on 390px)
 - Lint: 0 error, dev log semua 200 OK
 - VLM audit: 8/8 elemen referensi MATCH
+
+---
+Task ID: DapurAyam-RemoveKaraageRendang-AndNoPaymentShipping
+Agent: main (Super Z)
+Task: Hapus produk Chicken Karaage dan Bumbu Rendang (Padang) dari katalog. Konfirmasi tidak ada payment gateway atau API pengiriman di codebase.
+
+Work Log:
+- Verifikasi codebase: search keyword (payment|shipping|ongkir|stripe|midtrans|xendit|rajaongkir|jne|jnt|tiki|sicepat|anteraja) di src/ → hanya 1 hit di trust-badges.tsx ("Gratis Ongkir" sebagai badge marketing, bukan API).
+- Tidak ada kolom payment/shipping di schema.prisma — hanya komentar tentang "until a payment gateway is integrated later" (hapus di tahap berikutnya jika perlu).
+- Halaman checkout (src/components/public/checkout-content.tsx) sudah manual: form data pemesan → createOrderAction → admin lihat di dashboard → admin konfirmasi via WhatsApp. Tidak ada payment gateway, tidak ada shipping API, tidak ada perhitungan ongkir. Sudah sesuai permintaan user.
+
+- Buat scripts/remove-karaage-rendang.ts untuk menghapus 2 produk:
+  - Slug: "chicken-karaage", "ayam-bumbu-rendang"
+  - Cek apakah ada OrderItem yang mereferensikan productId → detach (set null) sebelum delete (cascade-safe)
+  - Hapus produk dari DB
+  - Re-align featuredOrder produk tersisa ke 1-4
+
+- Run script:
+  - chicken-karaage: deleted (Chicken Karaage)
+  - ayam-bumbu-rendang: deleted (Ayam Pejantan Bumbu Rendang)
+  - chicken-nugget: featuredOrder 5 → 4
+  - Final state: 4 produk tersisa, semua Rp 35.000, featuredOrder 1-4:
+    - Bumbu Kuning (order: 1) - Best Seller
+    - Bumbu Bali (order: 2)
+    - Bumbu Rujak (order: 3)
+    - Chicken Nugget Premium (order: 4)
+
+- Hapus file foto placeholder AI yang tidak lagi dipakai:
+  - /public/uploads/products/bumbu-rendang.jpg (deleted)
+  - /public/uploads/products/chicken-karaage.jpg (deleted)
+
+- Hapus script lama yang membuat produk tersebut:
+  - scripts/realign-products-to-reference.ts (deleted)
+
+- Update homepage (src/app/page.tsx):
+  - Tidak ada perubahan kode — logika slice(0,4) untuk product grid tetap, slice(4) untuk promo sekarang empty array → komponen PromoCards return null otomatis → section tidak ditampilkan.
+
+Verifikasi via Agent Browser (desktop 1440x900):
+- Homepage: 4 produk di grid (Bumbu Kuning Best Seller, Bali, Rujak, Nugget Premium), semua Rp 35.000
+- Promo cards section: hilang (tidak ada konten)
+- Layout lainnya (navbar, hero, trust badges, red selling points) tetap utuh
+- /produk: 4 produk terverifikasi via VLM
+- Direct URL /produk/chicken-karaage: 404 (produk tidak ditemukan)
+- Direct URL /produk/ayam-bumbu-rendang: 404 (produk tidak ditemukan)
+
+Lint: 0 errors
+Dev log: semua route 200 OK (kecuali 404 untuk produk yang sudah dihapus — behavior yang benar)
+
+Files changed:
+- DB: produk Chicken Karaage & Bumbu Rendang dihapus, featuredOrder re-aligned
+- /public/uploads/products/ — 2 file foto dihapus
+- /scripts/ — 1 file script lama dihapus
+Files created:
+- scripts/remove-karaage-rendang.ts (reusable untuk reset ulang jika perlu)
+
+Stage Summary:
+- 2 produk yang diminta user (Chicken Karaage + Bumbu Rendang/Padang) sudah dihapus dari DB dan file sistem
+- Tidak ada payment gateway, tidak ada shipping API di codebase — checkout sudah manual (form → admin konfirmasi via WA)
+- Katalog sekarang menampilkan 4 produk utama: Bumbu Kuning (Best Seller), Bumbu Bali, Bumbu Rujak, Chicken Nugget Premium — semua Rp 35.000
+- Featured product grid di homepage rapi (4 produk), section promo cards otomatis hidden
+- 0 lint error, semua route OK, 404 untuk URL produk yang sudah dihapus (correct behavior)
