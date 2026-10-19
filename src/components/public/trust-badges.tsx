@@ -4,7 +4,7 @@ const BADGES = [
   {
     icon: Truck,
     title: "Gratis Ongkir",
-    desc: "Area Alam Sutera, Serpong, Gading Serpong, BSD.",
+    desc: "Min. belanja Rp 150.000 — area Alam Sutera, BSD, Karawaci.",
   },
   {
     icon: CalendarDays,

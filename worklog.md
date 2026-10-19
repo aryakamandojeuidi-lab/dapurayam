@@ -572,3 +572,72 @@ Stage Summary:
 - Katalog sekarang menampilkan 4 produk utama: Bumbu Kuning (Best Seller), Bumbu Bali, Bumbu Rujak, Chicken Nugget Premium — semua Rp 35.000
 - Featured product grid di homepage rapi (4 produk), section promo cards otomatis hidden
 - 0 lint error, semua route OK, 404 untuk URL produk yang sudah dihapus (correct behavior)
+
+---
+Task ID: DapurAyam-UpdateBusinessInfo-WA-Address-Map
+Agent: main (Super Z)
+Task: Update info bisnis: Gratis Ongkir area Alam Sutera/BSD/Karawaci min Rp 150.000, alamat (Google Maps embed dari user), nomor WhatsApp 082310759060.
+
+Work Log:
+- Update trust badge "Gratis Ongkir" (src/components/public/trust-badges.tsx):
+  - Sebelum: "Area Alam Sutera, Serpong, Gading Serpong, BSD."
+  - Sesudah: "Min. belanja Rp 150.000 — area Alam Sutera, BSD, Karawaci."
+
+- Update FAQ "Apakah ada pengiriman? Wilayah mana saja yang terjangkau?" (src/components/public/faq-section.tsx):
+  - Sebelum: "Informasi pengiriman dan wilayah layanan akan diberikan saat pemesanan..."
+  - Sesudah: "Kami melayani pengiriman ke area Alam Sutera, BSD, dan Karawaci. Gratis ongkir berlaku untuk pembelian minimal Rp 150.000..."
+
+- Buat scripts/update-site-info.ts untuk update DB SiteSettings:
+  - WhatsApp: 082310759060 (lokal) → 6282310759060 (internasional, untuk wa.me URL)
+  - Address: "Mie Jawa Seramie, Jl. Raya Serpong, Kec. Serpong, Tangerang Selatan, Banten"
+  - Operational Hours: "Senin–Minggu, 08.00–20.00 WIB"
+  - Email: "dapurayam@serabites.com"
+  - Footer: "© 2026 Dapur Ayam by Serabites · Fresh by Order · Tanpa MSG · Tanpa Pengawet"
+
+- Buat komponen baru src/components/public/google-maps-embed.tsx:
+  - Google Maps embed URL (dari user iframe) di-hardcode di konstanta MAPS_EMBED_URL
+  - Iframe dengan width 100%, height 360px, allowFullScreen, lazy loading
+  - Title: "Lokasi Dapur Ayam by Serabites"
+  - referrerPolicy: strict-origin-when-cross-origin (sesuai iframe user)
+
+- Update src/app/kontak/page.tsx:
+  - Import GoogleMapsEmbed
+  - Tambahkan <GoogleMapsEmbed /> di dalam Card "Alamat & Jam Operasional" (setelah alamat & jam operasional text)
+  - Border rounded-xl dengan shadow-sm, min-height 360px
+
+- Update next.config.ts:
+  - Tambah komentar tentang iframe Google Maps embed (tidak ada perubahan config yang diperlukan karena Next.js 16 default mengizinkan iframe ke external domains)
+
+Verifikasi via Agent Browser (desktop 1440x900):
+- Homepage: badge "Gratis Ongkir" sekarang menampilkan "Min. belanja Rp 150.000 — area Alam Sutera, BSD, Karawaci."
+- Footer: WhatsApp: 6282310759060, alamat lengkap, jam operasional, email
+- Tampilan WA link dari produk: wa.me/6282310759060 dengan pesan otomatis per-produk ✓
+- /kontak: 
+  - WhatsApp: 6282310759060 ✓
+  - Alamat: Mie Jawa Seramie, Jl. Raya Serpong, Kec. Serpong, Tangerang Selatan, Banten ✓
+  - Jam Operasional: Senin–Minggu, 08.00–20.00 WIB ✓
+  - Google Maps iframe loaded (src verified via JS eval, dimensions 552x360) ✓
+  - Map blank di sandbox browser (Google Maps requires external network access), tapi iframe loaded properly dan akan tampil normal di browser user
+
+Lint: 0 errors
+Dev log: semua route 200 OK
+
+Files changed:
+- src/components/public/trust-badges.tsx (Gratis Ongkir desc updated)
+- src/components/public/faq-section.tsx (FAQ pengiriman updated)
+- src/app/kontak/page.tsx (import GoogleMapsEmbed + tambah map di Card alamat)
+- next.config.ts (comment tentang iframe, no actual config change)
+Files created:
+- src/components/public/google-maps-embed.tsx (Google Maps iframe component)
+- scripts/update-site-info.ts (reusable script untuk update SiteSettings)
+
+Stage Summary:
+- Info bisnis real sekarang tampil di seluruh website:
+  - WhatsApp: 082310759060 (6282310759060 untuk wa.me)
+  - Alamat: Mie Jawa Seramie, Jl. Raya Serpong, Tangerang Selatan
+  - Jam Operasional: Senin–Minggu, 08.00–20.00 WIB
+  - Email: dapurayam@serabites.com
+  - Gratis ongkir area Alam Sutera, BSD, Karawaci (min Rp 150.000)
+- Google Maps embed iframe ditampilkan di halaman kontak di bawah alamat
+- Tombol "Pesan Sekarang" di navbar, "Pesan via WhatsApp" di produk card, dan CTA "Mulai Konsultasi" di kontak semuanya menggunakan nomor WA yang benar (6282310759060) dengan format wa.me URL internasional
+- 0 lint error, semua route OK

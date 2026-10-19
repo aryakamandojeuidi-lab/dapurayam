@@ -36,7 +36,7 @@ const FAQS = [
   {
     question: "Apakah ada pengiriman? Wilayah mana saja yang terjangkau?",
     answer:
-      "Informasi pengiriman dan wilayah layanan akan diberikan saat pemesanan. Untuk pembelian via Shopee, opsi pengiriman mengikuti standar Shopee. Untuk pemesanan via WhatsApp, pengiriman dapat diatur sesuai kesepakatan. Hubungi kami untuk memastikan wilayah Anda terjangkau.",
+      "Kami melayani pengiriman ke area Alam Sutera, BSD, dan Karawaci. Gratis ongkir berlaku untuk pembelian minimal Rp 150.000. Untuk pembelian via Shopee, opsi pengiriman mengikuti standar Shopee. Untuk pemesanan via WhatsApp, pengiriman dapat diatur sesuai kesepakatan. Hubungi kami untuk memastikan wilayah Anda terjangkau.",
   },
 ];
 

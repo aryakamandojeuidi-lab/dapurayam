@@ -3,6 +3,7 @@ import { MessageCircle, Mail, MapPin, Clock, Instagram, Facebook, ShoppingBag } 
 import { PublicShell } from "@/components/public/public-shell";
 import { WhatsAppButton } from "@/components/public/whatsapp-button";
 import { ContactForm } from "@/components/public/contact-form";
+import { GoogleMapsEmbed } from "@/components/public/google-maps-embed";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
@@ -199,6 +200,10 @@ export default async function KontakPage() {
                         Jam operasional akan diperbarui segera oleh admin.
                       </p>
                     )}
+                  </div>
+                  {/* Google Maps embed */}
+                  <div className="mt-4">
+                    <GoogleMapsEmbed className="overflow-hidden rounded-xl border border-border bg-card shadow-sm" />
                   </div>
                 </CardContent>
               </Card>
