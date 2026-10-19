@@ -10,7 +10,7 @@ export async function updateSettingsAction(formData: FormData) {
 
   const raw = {
     businessName: String(formData.get("businessName") || ""),
-    tagline: String(formData.get("tagline") || "") || null,
+    tagline: String(formData.get("tagline") || "") || undefined,
     description: String(formData.get("description") || "") || null,
     whatsappNumber: String(formData.get("whatsappNumber") || "") || null,
     contactEmail: String(formData.get("contactEmail") || "") || null,
@@ -37,10 +37,30 @@ export async function updateSettingsAction(formData: FormData) {
   }
 
   try {
+    const data = {
+      businessName: parsed.data.businessName,
+      tagline: parsed.data.tagline ?? undefined,
+      description: parsed.data.description ?? null,
+      whatsappNumber: parsed.data.whatsappNumber ?? null,
+      contactEmail: parsed.data.contactEmail ?? null,
+      address: parsed.data.address ?? null,
+      operationalHours: parsed.data.operationalHours ?? null,
+      instagramUrl: parsed.data.instagramUrl ?? null,
+      facebookUrl: parsed.data.facebookUrl ?? null,
+      tiktokUrl: parsed.data.tiktokUrl ?? null,
+      footerText: parsed.data.footerText ?? null,
+      heroHeadline: parsed.data.heroHeadline ?? null,
+      heroSubtext: parsed.data.heroSubtext ?? null,
+      shopeeStoreUrl: parsed.data.shopeeStoreUrl ?? null,
+      tokopediaStoreUrl: parsed.data.tokopediaStoreUrl ?? null,
+      positioningLabel: parsed.data.positioningLabel ?? null,
+      freshnessNote: parsed.data.freshnessNote ?? null,
+    };
+
     await db.siteSettings.upsert({
       where: { id: "default" },
-      update: parsed.data,
-      create: { id: "default", ...parsed.data },
+      update: data,
+      create: { id: "default", ...data },
     });
     revalidatePath("/");
     revalidatePath("/produk");

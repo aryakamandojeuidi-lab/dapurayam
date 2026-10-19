@@ -20,7 +20,6 @@ import {
   CreateLink,
   InsertImage,
   InsertTable,
-  KitchenSinkToolbar,
 } from "@mdxeditor/editor";
 import { useRef } from "react";
 import "@mdxeditor/editor/style.css";
@@ -66,7 +65,7 @@ export function ArticleEditor({ value, onChange }: Props) {
           }),
           toolbarPlugin({
             toolbarContents: () => (
-              <KitchenSinkToolbar>
+              <>
                 <UndoRedo />
                 <BlockTypeSelect />
                 <BoldItalicUnderlineToggles />
@@ -75,7 +74,7 @@ export function ArticleEditor({ value, onChange }: Props) {
                 <InsertImage />
                 <InsertTable />
                 <InsertThematicBreak />
-              </KitchenSinkToolbar>
+              </>
             ),
           }),
         ]}

@@ -59,12 +59,18 @@ bun install
 Buat file `.env` di root:
 
 ```env
-DATABASE_URL="file:./dev.db"
+# Database — sandbox/dev pakai SQLite lokal
+DATABASE_URL="file:/home/z/my-project/db/custom.db"
+
+# Autentikasi admin (NextAuth.js) — WAJIB diisi untuk produksi
+# Generate dengan: openssl rand -base64 32
 NEXTAUTH_SECRET="ganti-dengan-string-acak-min-32-karakter"
+
+# URL publik website — sandbox: http://localhost:3000 | produksi: https://domainanda.com
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
-> Generate NEXTAUTH_SECRET: `openssl rand -base64 32`
+> Lihat `.env.example` untuk dokumentasi lengkap environment variables.
 
 ### 3. Inisialisasi Database
 
@@ -206,11 +212,15 @@ bun run start
 
 ## Roadmap
 
-- [ ] Sistem checkout dengan keranjang belanja
-- [ ] Integrasi payment gateway (Midtrans, Xendit)
-- [ ] Manajemen inventory & stok produk
-- [ ] Dashboard analitik penjualan
-- [ ] Email otomatis untuk order confirmation
+- [x] Sistem checkout dengan keranjang belanja (multi-produk per order)
+- [x] Modul Pesanan (CMS admin dengan status workflow + chat WA ke pelanggan)
+- [x] Multi-kanal pembelian: Website (cart+checkout) | Shopee (per produk + global) | WhatsApp (konsultasi)
+- [x] Premium positioning: Fresh by Order + Tanpa MSG + Tanpa Pengawet + Kelas Atas
+- [ ] Integrasi payment gateway (Midtrans, Xendit) untuk checkout otomatis
+- [ ] Manajemen inventory & stok produk (kurangi stok saat order)
+- [ ] Dashboard analitik penjualan (omzet, produk terlaris, grafik)
+- [ ] Email otomatis untuk order confirmation ke pelanggan + admin
+- [ ] Notifikasi WhatsApp otomatis ke admin saat ada order masuk
 - [ ] Multi-bahasa (Indonesia/Inggris)
 - [ ] PWA / offline support
 

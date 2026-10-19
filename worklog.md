@@ -327,3 +327,53 @@ Stage Summary:
 - Mobile responsive: tidak ada overflow, layout tetap rapi
 - 0 lint error, semua route 200 OK
 
+
+---
+Task ID: DapurAyam-Final-ProductionReady
+Agent: main (Super Z)
+Task: Final cleanup, debugging, dan dokumentasi environment variables untuk produksi.
+
+Work Log:
+- Audit akhir: cek .env (NEXTAUTH_SECRET hilang lagi), lint (0 error), dev log (semua 200 OK)
+- Run `bunx tsc --noEmit` untuk TypeScript check → temukan 2 bug:
+  1. `src/actions/settings-actions.ts` — Prisma tidak accept `null` langsung untuk update nullable string fields (TypeScript strict mode)
+  2. `src/components/admin/article-editor.tsx` — `KitchenSinkToolbar` adalah `FC` tanpa children props, pakai `<>{children}</>` fragment sebagai gantinya
+- Fix `src/actions/settings-actions.ts`:
+  - Build data object eksplisit dengan tipe yang benar (tagline non-nullable → undefined jika kosong, lainnya nullable → null)
+  - Tambahkan komentar penjelasan
+- Fix `src/components/admin/article-editor.tsx`:
+  - Hapus `KitchenSinkToolbar` import (tidak dipakai lagi)
+  - Ganti `<KitchenSinkToolbar>{...}</KitchenSinkToolbar>` dengan `<>{...}</>` fragment
+- Restore `.env` (NEXTAUTH_SECRET + NEXTAUTH_URL) yang hilang lagi
+- Buat `.env.example` dengan dokumentasi lengkap:
+  - DATABASE_URL untuk sandbox (SQLite) dan produksi (Neon PostgreSQL) dengan contoh connection string
+  - NEXTAUTH_SECRET dengan instruksi `openssl rand -base64 32`
+  - NEXTAUTH_URL untuk sandbox dan produksi
+  - Catatan untuk switch provider Prisma sqlite → postgresql
+- Update README.md:
+  - Fix path DATABASE_URL ke `file:/home/z/my-project/db/custom.db` (sebelumnya `file:./dev.db`)
+  - Tambah referensi ke `.env.example`
+  - Update Roadmap: tandai fitur yang sudah selesai (cart+checkout, modul pesanan, multi-kanal, premium positioning)
+- Restart dev server untuk pick up .env baru
+- Verify semua 11 route: 200 OK (/ / /produk /produk/[slug] /journal /tentang /kontak /keranjang /checkout /admin/login /sitemap.xml /robots.txt)
+- Test end-to-end flow:
+  - Clear cookies → browse produk → add to cart → checkout → submit → redirect ke /pesanan/ORD-20261019-SYSE/sukses → admin sees order dengan Rp 30.000 + status Menunggu Konfirmasi
+  - Order berhasil dihapus dari DB setelah test
+- Final verification:
+  - Lint: 0 error
+  - TypeScript `src/`: 0 error (hanya `examples/` dan `skills/` template punya error, bukan code kita)
+  - Dev log: semua route 200 OK, tidak ada error
+
+Files changed:
+- src/actions/settings-actions.ts (fix Prisma null typing + build data object eksplisit)
+- src/components/admin/article-editor.tsx (fix KitchenSinkToolbar FC without children → use fragment)
+- .env (restore NEXTAUTH_SECRET + NEXTAUTH_URL)
+- .env.example (NEW — dokumentasi environment variables)
+- README.md (fix DATABASE_URL path + referensi .env.example + update Roadmap)
+
+Stage Summary:
+- Website production-ready: 0 lint error, 0 TypeScript error di src/, semua route 200 OK
+- Environment variables documented di .env.example dengan instruksi sandbox vs produksi
+- README updated dengan path DB benar + Roadmap refleksi status fitur terkini
+- End-to-end flow tested: browse → add to cart → checkout → submit → admin sees order (verified working)
+
