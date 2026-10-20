@@ -50,11 +50,11 @@ export default function AdminLoginPage() {
           <img
             src="/logofav.jpg"
             alt="Dapur Ayam logo"
-            width={64}
-            height={64}
-            className="h-16 w-16 rounded-2xl object-cover shadow"
+            width={96}
+            height={96}
+            className="h-24 w-24 rounded-2xl object-cover shadow-md ring-2 ring-primary/20"
           />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="mt-5 text-2xl font-bold tracking-tight text-foreground">
             Dapur Ayam — Admin
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">

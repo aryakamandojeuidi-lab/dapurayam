@@ -52,13 +52,14 @@ export function FeaturedProducts({ products, whatsappNumber }: Props) {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((p, idx) => (
             <ProductCard
               key={p.id}
               product={p}
               whatsappNumber={whatsappNumber}
               bestSeller={idx === 0}
+              className="h-full"
             />
           ))}
         </div>

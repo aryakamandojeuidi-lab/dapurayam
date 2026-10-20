@@ -41,15 +41,15 @@ export function Footer({ settings, className }: { settings: Settings | null; cla
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-3">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-3">
               <img
                 src="/logofav.jpg"
                 alt={`${s?.businessName || "Dapur Ayam"} logo`}
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-lg object-cover"
+                width={48}
+                height={48}
+                className="h-12 w-12 rounded-xl object-cover ring-1 ring-primary/20"
               />
-              <span className="font-bold text-foreground">
+              <span className="text-lg font-bold text-foreground">
                 {s?.businessName || "Dapur Ayam"}
               </span>
             </Link>

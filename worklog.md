@@ -641,3 +641,84 @@ Stage Summary:
 - Google Maps embed iframe ditampilkan di halaman kontak di bawah alamat
 - Tombol "Pesan Sekarang" di navbar, "Pesan via WhatsApp" di produk card, dan CTA "Mulai Konsultasi" di kontak semuanya menggunakan nomor WA yang benar (6282310759060) dengan format wa.me URL internasional
 - 0 lint error, semua route OK
+
+---
+Task ID: DapurAyam-NewHeroImage-UniformCards-BiggerLogo
+Agent: main (Super Z)
+Task: Ganti foto hero dengan foto produk vakum ayam berbumbu yang baru. Samakan ukuran kartu produk (tidak ada yang beda-beda tinggi). Perbesar logo di seluruh halaman.
+
+Work Log:
+- Pahami 2 instruksi dari gambar feedback user (IMG-20261020-WA0004.jpg):
+  1. Green arrow di hero: "foto ini ganti sama foto ini" — ganti foto hero dengan foto produk baru
+  2. Green arrow di product cards: "ukurannya kalo bisa dibikin sama rata biar ga beda2 gini" — samakan ukuran kartu produk
+- Plus request eksplisit: "logonya juga perbesar sekalian"
+
+- Copy foto baru (IMG-20261017-WA0017.jpg — vacuum-sealed marinated chicken dengan rempah di sekeliling) ke /public/uploads/products/hero-ayam-premium.jpg (overwrite hero lama)
+  - Foto user: chicken vacuum pack, portrait 3:4, no text labels, ada spices (cabai, garlic, peppercorn, lime leaves) di sekitar → perfect untuk hero produk makanan premium
+
+- Rebuild ProductCard (src/components/public/product-card.tsx) untuk tinggi konsisten:
+  - Image container: aspect-square (1:1) dengan object-cover (sebelumnya aspect-[3/4] + object-contain → padding putih bikin cards beda tinggi)
+  - Card body: tambah h-full + flex flex-col
+  - Title: line-clamp-2 + min-h-[2.5rem] → konsisten 2 baris
+  - Description: line-clamp-2 + min-h-[2.5rem] → konsisten 2 baris (atau placeholder text jika shortDescription null)
+  - Price row: min-h-[1.75rem] → konsisten
+  - Action buttons: mt-auto (push to bottom) → semua card align di bottom
+  - Grid: items-stretch + h-full → grid stretch all cards to same row height
+
+- Update FeaturedProducts grid (src/components/public/featured-products.tsx):
+  - Tambah items-stretch ke grid
+  - Pass className="h-full" ke setiap ProductCard
+
+- Update ProductSearch grid (src/components/public/product-search.tsx):
+  - Tambah items-stretch ke grid
+  - Pass className="h-full" ke setiap ProductCard
+
+- Perbesar logo di 4 lokasi:
+  1. Navbar desktop (src/components/public/navbar.tsx):
+     - Header height: h-16 → h-20 (64px → 80px)
+     - Logo: 36x36 → 56x56 (h-9 → h-14, rounded-lg → rounded-xl)
+     - Brand text: text-lg → text-xl
+  2. Navbar mobile sheet (src/components/public/navbar.tsx):
+     - Logo: 32x32 → 44x44 (h-8 → h-11, rounded-lg → rounded-xl)
+  3. Footer (src/components/public/footer.tsx):
+     - Logo: 32x32 → 48x48 (h-8 → h-12, rounded-lg → rounded-xl)
+     - Brand text: font-bold → text-lg font-bold
+  4. Admin sidebar (src/components/admin/admin-sidebar.tsx):
+     - Header height: h-16 → h-20
+     - Logo: 36x36 → 48x48 (h-9 → h-12, rounded-lg → rounded-xl, +ring-1 ring-primary/20)
+     - Brand text: text-sm → text-base
+  5. Admin login (src/app/admin/login/page.tsx):
+     - Logo: 64x64 → 96x96 (h-16 → h-24, rounded-2xl, +ring-2 ring-primary/20)
+     - Margin: mt-4 → mt-5
+
+Verifikasi via Agent Browser (desktop 1440x900):
+- Homepage: 
+  - Hero image = vacuum-sealed marinated chicken + rempah (foto user baru) ✓
+  - 4 product cards: ALL SAME HEIGHT, bottom edges perfectly aligned, "Lihat Detail" + "Pesan" buttons at same vertical level ✓
+  - Navbar logo: visibly larger than brand text ✓
+- /produk: 4 cards uniform, "cards form a clean, uniform grid with equal heights" (VLM) ✓
+- /admin/login: logo ~80-100px wide (1.5x heading text height) ✓
+
+Lint: 0 errors
+Dev log: semua route 200 OK
+
+Files changed:
+- /public/uploads/products/hero-ayam-premium.jpg (overwrite dengan foto vacuum pack baru)
+- src/components/public/product-card.tsx (rebuild untuk tinggi konsisten)
+- src/components/public/featured-products.tsx (items-stretch + h-full)
+- src/components/public/product-search.tsx (items-stretch + h-full)
+- src/components/public/navbar.tsx (logo 56x56, header h-20, mobile logo 44x44)
+- src/components/public/footer.tsx (logo 48x48, text-lg)
+- src/components/admin/admin-sidebar.tsx (logo 48x48, header h-20)
+- src/app/admin/login/page.tsx (logo 96x96)
+
+Stage Summary:
+- Hero image: diganti ke foto vacuum-sealed marinated chicken yang user upload (fokus produk, ada rempah di sekitar, tidak ada text overlay)
+- Product cards: tinggi seragam dengan aspect-square image + object-cover, line-clamped title & desc (2 baris masing-masing), action buttons di-push ke bottom via mt-auto, grid items-stretch
+- Logo diperbesar di semua lokasi:
+  - Navbar: 36→56 (+55%)
+  - Navbar mobile sheet: 32→44 (+37%)
+  - Footer: 32→48 (+50%)
+  - Admin sidebar: 36→48 (+33%)
+  - Admin login: 64→96 (+50%)
+- 0 lint error, semua route 200 OK, VLM audit confirmed all 3 changes
