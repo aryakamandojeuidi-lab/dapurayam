@@ -49,20 +49,20 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
         scrolled ? "shadow-sm" : "shadow-none",
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
         <Link
           href="/"
-          className="flex items-center gap-2.5"
+          className="flex items-center gap-3"
           aria-label={`${businessName} beranda`}
         >
           <img
             src="/logofav.jpg"
             alt={`${businessName || "Dapur Ayam"} logo`}
-            width={36}
-            height={36}
-            className="h-9 w-9 rounded-lg object-cover ring-1 ring-primary/20"
+            width={56}
+            height={56}
+            className="h-14 w-14 rounded-xl object-cover ring-1 ring-primary/20"
           />
-          <span className="text-lg font-bold tracking-tight text-foreground">
+          <span className="text-xl font-bold tracking-tight text-foreground">
             {businessName || "Dapur Ayam"}
           </span>
         </Link>
@@ -120,13 +120,13 @@ export function Navbar({ whatsappNumber, businessName }: Props) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="w-[300px] sm:w-[360px]">
           <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
+            <SheetTitle className="flex items-center gap-3">
               <img
                 src="/logofav.jpg"
                 alt={`${businessName || "Dapur Ayam"} logo`}
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-lg object-cover"
+                width={44}
+                height={44}
+                className="h-11 w-11 rounded-xl object-cover"
               />
               {businessName || "Dapur Ayam"}
             </SheetTitle>

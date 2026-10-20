@@ -38,16 +38,16 @@ export function AdminSidebar({ userName, userEmail }: Props) {
 
   return (
     <aside className="hidden w-64 flex-shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:flex-col">
-      <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
+      <div className="flex h-20 items-center gap-3 border-b border-sidebar-border px-6">
         <img
           src="/logofav.jpg"
           alt="Dapur Ayam logo"
-          width={36}
-          height={36}
-          className="h-9 w-9 rounded-lg object-cover"
+          width={48}
+          height={48}
+          className="h-12 w-12 rounded-xl object-cover ring-1 ring-primary/20"
         />
         <div>
-          <p className="text-sm font-bold leading-tight text-sidebar-foreground">
+          <p className="text-base font-bold leading-tight text-sidebar-foreground">
             Dapur Ayam
           </p>
           <p className="text-xs text-muted-foreground">Admin Panel</p>

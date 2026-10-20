@@ -93,9 +93,9 @@ export function ProductSearch({ products, categories, whatsappNumber }: Props) {
             </p>
           </div>
         ) : (
-          <div className={cn("grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4")}>
+          <div className={cn("grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4")}>
             {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} whatsappNumber={whatsappNumber} />
+              <ProductCard key={p.id} product={p} whatsappNumber={whatsappNumber} className="h-full" />
             ))}
           </div>
         )}
