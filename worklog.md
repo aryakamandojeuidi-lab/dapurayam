@@ -722,3 +722,146 @@ Stage Summary:
   - Admin sidebar: 36→48 (+33%)
   - Admin login: 64→96 (+50%)
 - 0 lint error, semua route 200 OK, VLM audit confirmed all 3 changes
+
+---
+Task ID: DapurAyam-MultiPhotoGallery-GitHubPush
+Agent: main (Super Z)
+Task: Tambahkan fitur multi-foto per produk (gallery) supaya pemilik bisa tambah foto baru kapan saja via admin. Lalu push ke GitHub user.
+
+Work Log:
+- Plan: galleryImages disimpan sebagai JSON string di kolom Product.galleryImages (SQLite tidak support array native), max 6 foto galeri per produk + 1 foto utama (imageUrl).
+
+- Schema change (prisma/schema.prisma):
+  - Tambah kolom: `galleryImages String?` di model Product
+  - Komentar: "JSON-encoded array of additional photo URLs"
+
+- Run `bun run db:push` untuk apply schema → sukses (SQLite DB updated)
+- Run `bunx prisma generate` untuk regenerate Prisma Client yang include field baru → sukses
+
+- Buat helper (src/lib/gallery.ts):
+  - parseGalleryImages(raw) → string[] (safe JSON parse, returns [] on error)
+  - serializeGalleryImages(images) → JSON string (dedupe, cap at 8, filter empty)
+  - getAllProductPhotos(imageUrl, galleryRaw) → string[] (main first, lalu gallery, deduped)
+
+- Buat komponen GalleryUploader (src/components/admin/gallery-uploader.tsx):
+  - "use client" component, max 6 foto (configurable via prop)
+  - Grid 2-4 columns dengan thumbnail + remove button per foto
+  - Upload file via /api/upload endpoint
+  - Tambah URL manual (untuk URL eksternal)
+  - Counter "X / 6" untuk feedback visual
+
+- Update ProductForm (src/components/admin/product-form.tsx):
+  - Import GalleryUploader
+  - Tambah state galleryImages (parsed dari initialData.galleryImages)
+  - Pass galleryImages ke GalleryUploader di dalam Card "Gambar Produk"
+  - FormData.set("galleryImages", serializeGalleryImages(galleryImages)) saat submit
+  - Label "Foto Utama" untuk ImageUploader existing (supaya tidak ambigu)
+
+- Update product-actions.ts (createProductAction & updateProductAction):
+  - Tambah `galleryImages: String(formData.get("galleryImages") || "") || null` ke raw object
+  - Tambah `galleryImages: raw.galleryImages || null` ke db.product.create/update data
+
+- Update admin/produk/[id]/edit/page.tsx:
+  - Pass `galleryImages: product.galleryImages as unknown as string[] | null` ke initialData
+
+- Buat endpoint upload (src/app/api/upload/route.ts) — karena tidak ada sebelumnya:
+  - POST handler, admin-only (getServerSession + authOptions)
+  - Validation: MIME type (JPEG/PNG/WebP), max 5MB
+  - Save ke /public/uploads/products/<uuid>-<sanitized-name>
+  - Return { url: "/uploads/products/..." }
+
+- Buat komponen ProductGallery (src/components/public/product-gallery.tsx):
+  - "use client" component
+  - Main image (aspect-[3/4], object-contain)
+  - Thumbnail grid (grid-cols-5) — hanya tampil jika >1 foto
+  - Click thumbnail → switch main image (useState activeIdx)
+  - Active thumbnail: border-primary + ring-2 ring-primary/30 + aria-pressed="true"
+  - Empty state: Package icon placeholder
+
+- Update produk/[slug]/page.tsx:
+  - Import ProductGallery & getAllProductPhotos
+  - Ganti single image div dengan <ProductGallery photos={getAllProductPhotos(...)} alt={name} />
+  - Remove unused Package import
+
+- Bug fix selama development:
+  - NEXTAUTH_SECRET missing → restore ke .env (dipakai ulang openssl rand -base64 32)
+  - Setelah generate ulang Prisma client, restart dev server
+  - Initial render gallery tidak muncul karena Prisma client lama (tanpa galleryImages) — fix dengan `bunx prisma generate` + dev server restart
+
+- Test end-to-end via Agent Browser:
+  1. Login admin: admin@dapurayam.com / dapurayam-admin-2026 → sukses redirect ke /admin/dashboard
+  2. Edit "Ayam Pejantan Bumbu Kuning" → upload foto via gallery uploader → counter "1 / 6" muncul → click Simpan → sukses
+  3. Cek DB: galleryImages raw = ["/uploads/products/...bumbu-bali.jpg", "/uploads/products/...nugget-keju.jpg"]
+  4. Buka /produk/ayam-penjantan-bumbu-ungkep → 3 tombol "Lihat foto 1/2/3" muncul di DOM
+  5. Click "Lihat foto 2" → aria-pressed=true + class "border-primary ring-2 ring-primary/30"
+  6. Edit Chicken Nugget → upload 1 foto → save → verify DB
+  7. Buka /produk/chicken-nugget → 2 tombol gallery muncul
+
+- Verifikasi visual via VLM: 3 thumbnail visible, active ring on selected thumbnail, click switch main image
+
+=== GITHUB PUSH ===
+
+- Cek git status: ada banyak perubahan yang belum di-commit (redesign homepage, multi-foto, dll)
+- Cek remote: belum ada remote yang dikonfigurasi
+- Cek .gitignore: .env*, /skills/, /download/ belum di-ignore (download ada tapi tidak di .gitignore)
+- User berikan PAT: github_pat_11B6CWNSA0...
+
+- Get user info via GitHub API:
+  - Login: aryakamandojeuidi-lab
+  - ID: 260400840
+- Cek apakah repo dapurayam sudah ada: YA, kosong (size: 0)
+  - URL: github.com/aryakamandojeuidi-lab/dapurayam
+  - Visibility: public
+  - Default branch: main
+
+- Update .gitignore untuk exclude:
+  - /download/ (demo screenshots)
+  - /upload/ (raw source files dari owner)
+  - /tool-results/ (skill scratch space)
+  - /db/ (SQLite sandbox DB)
+  - /scripts/check-product-galleries.ts (debug script)
+
+- Untrack file-file yang sudah ada di repo tapi sekarang di-ignore:
+  - git rm -r --cached download/ upload/ db/ tool-results/
+  - git rm --cached .env (KENAPA .env tracked sebelumnya?! Berbahaya — harusnya .env* di .gitignore dari awal)
+
+- Buat .env.example dengan dokumentasi setup (DATABASE_URL sandbox vs prod, NEXTAUTH_SECRET cara generate, NEXTAUTH_URL)
+
+- Verify tidak ada secret di git history:
+  - grep "github_pat_" → tidak ada (PAT tidak pernah ditulis ke file)
+  - grep "NEXTAUTH_SECRET" → hanya mention di worklog.md (bukan nilai sebenarnya)
+
+- Git config: user.name + user.email (pakai noreply.github.com email)
+- git add -A, commit dengan message lengkap fitur multi-photo gallery
+- Add remote dengan PAT embedded: https://aryakamandojeuidi-lab:<PAT>@github.com/.../dapurayam.git
+- git push -u origin main → SUCCESS (new branch main)
+- Replace remote URL dengan clean HTTPS (tanpa PAT) untuk security
+- Verify via GitHub API: commit 146912e ada di repo, branch main, public visibility
+
+Files created (new):
+- src/lib/gallery.ts (gallery helpers)
+- src/components/admin/gallery-uploader.tsx (admin gallery upload UI)
+- src/components/public/product-gallery.tsx (public product gallery component)
+- src/app/api/upload/route.ts (POST /api/upload endpoint)
+- .env.example (env setup documentation)
+
+Files changed:
+- prisma/schema.prisma (tambah kolom galleryImages)
+- src/components/admin/product-form.tsx (integrate GalleryUploader)
+- src/actions/product-actions.ts (handle galleryImages in create/update)
+- src/app/admin/(authed)/produk/[id]/edit/page.tsx (pass galleryImages to form)
+- src/app/produk/[slug]/page.tsx (replace single image dengan ProductGallery)
+- .gitignore (exclude demo/uploads/db/tool-results)
+
+Files untracked from git:
+- .env (security: should never have been tracked)
+- /download/ (demo screenshots)
+- /upload/ (raw source files)
+- /tool-results/ (skill scratch)
+- /db/ (SQLite sandbox)
+
+Stage Summary:
+- Feature: pemilik bisnis dapat menambah hingga 6 foto galeri per produk melalui admin dashboard. Foto tersimpan di /public/uploads/products/, URL disimpan di Product.galleryImages sebagai JSON string. Halaman detail publik menampilkan main image + thumbnail grid yang bisa di-click untuk switching.
+- Endpoint /api/upload baru: admin-only, validasi MIME + size, simpan ke filesystem lokal. Untuk produksi sebaiknya pindah ke S3/Vercel Blob, tapi untuk MVP sudah cukup.
+- GitHub: repo dapurayam (public) di github.com/aryakamandojeuidi-lab/dapurayam sudah berisi commit 146912e dengan semua code. Remote URL diset ke clean HTTPS (PAT tidak disimpan di git config). .env.example disediakan untuk setup pengguna baru.
+- PAT user hanya dipakai untuk auth push awal, tidak disimpan permanen di mana pun.
