@@ -59,6 +59,9 @@ export default async function EditProductPage({ params }: Props) {
           price: product.price,
           packageSize: product.packageSize,
           imageUrl: product.imageUrl,
+          // galleryImages stored as JSON string in DB; pass raw so the form
+          // component can parse it via parseGalleryImages().
+          galleryImages: product.galleryImages as unknown as string[] | null,
           ingredients: product.ingredients,
           storageInstructions: product.storageInstructions,
           servingSuggestion: product.servingSuggestion,

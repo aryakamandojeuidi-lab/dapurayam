@@ -36,6 +36,9 @@ model Product {
   price               Float?
   packageSize         String?
   imageUrl            String?
+  // JSON-encoded array of additional photo URLs (e.g. '["/uploads/x.jpg", "/uploads/y.jpg"]')
+  // Owner can add up to N gallery photos via the admin dashboard.
+  galleryImages       String?
   ingredients         String?
   storageInstructions String?
   servingSuggestion   String?

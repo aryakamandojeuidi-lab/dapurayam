@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { GalleryUploader } from "@/components/admin/gallery-uploader";
 import { useToast } from "@/hooks/use-toast";
 import { slugify } from "@/lib/prisma-helpers";
+import { parseGalleryImages, serializeGalleryImages } from "@/lib/gallery";
 
 type Category = { id: string; name: string };
 
@@ -43,6 +45,7 @@ type Props = {
     shopeeUrl?: string | null;
     tokopediaUrl?: string | null;
     websiteOrderEnabled?: boolean | null;
+    galleryImages?: string[] | null;
   };
   categories: Category[];
   submitLabel?: string;
@@ -78,6 +81,9 @@ export function ProductForm({
   const [websiteOrderEnabled, setWebsiteOrderEnabled] = useState(
     initialData?.websiteOrderEnabled ?? true,
   );
+  const [galleryImages, setGalleryImages] = useState<string[]>(
+    parseGalleryImages(initialData?.galleryImages as unknown as string | null | undefined),
+  );
 
   const onNameChange = (v: string) => {
     setName(v);
@@ -112,6 +118,8 @@ export function ProductForm({
     formData.set("shopeeUrl", shopeeUrl);
     formData.set("tokopediaUrl", tokopediaUrl);
     formData.set("websiteOrderEnabled", String(websiteOrderEnabled));
+    // Gallery images stored as JSON string in DB
+    formData.set("galleryImages", serializeGalleryImages(galleryImages));
 
     const res = await action(formData);
     setLoading(false);
@@ -272,7 +280,15 @@ export function ProductForm({
               <CardTitle>Gambar Produk</CardTitle>
             </CardHeader>
             <CardContent>
-              <ImageUploader value={imageUrl} onChange={setImageUrl} />
+              <ImageUploader value={imageUrl} onChange={setImageUrl} label="Foto Utama" />
+              <div className="mt-6 border-t border-border pt-6">
+                <GalleryUploader
+                  value={galleryImages}
+                  onChange={setGalleryImages}
+                  label="Galeri Foto Tambahan"
+                  max={6}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>

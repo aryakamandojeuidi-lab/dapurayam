@@ -52,3 +52,17 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# Demo / temp screenshots from local dev work
+/download/
+# Raw source uploads from owner (kept locally, not in git)
+/upload/
+
+# Tool result scratch space (kept locally only)
+/tool-results/
+
+# Local DB (SQLite sandbox only)
+/db/
+
+# Local scripts that operate on local DB (kept locally only)
+/scripts/check-product-galleries.ts
