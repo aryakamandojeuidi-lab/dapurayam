@@ -1144,3 +1144,65 @@ Stage Summary:
 - Dengan fix ini, page akan render dengan empty state (bukan crash) jika DB unavailable
 - Error boundary kasih user petunjuk konkret apa yang harus dilakukan (set env vars di Vercel)
 - Build sukses + test dengan bad DB tetap 200 OK
+
+---
+Task ID: DapurAyam-VercelBlobStorage
+Agent: main (Super Z)
+Task: Fix gagal upload foto di Vercel — setup persistent storage (Vercel Blob).
+
+Work Log:
+- User tanya "gagal unggah foto apa kita harus setup storage neon?"
+- Penjelasan: Neon hanya untuk Postgres (data teks), bukan untuk file gambar.
+  Penyebab gagal di Vercel: filesystem serverless ephemeral — file yang di-save
+  ke /public/uploads/ akan hilang setelah request selesai dan tidak persist
+  antar invocation/deploy.
+
+- Solution: dual storage path via env var detection:
+  - BLOB_READ_WRITE_TOKEN set → Vercel Blob (production)
+  - BLOB_READ_WRITE_TOKEN kosong → local filesystem (dev)
+
+- Install @vercel/blob@2.8.2:
+  - `bun add @vercel/blob` → sukses, 25 packages installed
+
+- Rewrite src/app/api/upload/route.ts:
+  - Import `put` dari @vercel/blob
+  - Deteksi BLOB_READ_WRITE_TOKEN untuk switch storage path:
+    - Production: `put('products/<filename>', file, { access: 'public', contentType })`
+      → return blob.url (persistent Vercel Blob URL)
+    - Local dev: writeFile ke /public/uploads/products/
+      → return /uploads/products/<filename> (Next.js static)
+  - Error message diperbaiki: mention BLOB_READ_WRITE_TOKEN setup hint
+
+- Update .env.example dengan instruksi setup BLOB_READ_WRITE_TOKEN:
+  - Jelaskan cara dapat token dari Vercel → Storage → Create Blob
+  - Default empty untuk local dev (filesystem fallback)
+
+- Cleanup: hapus file test logofav yang ke-commit sebelumnya:
+  - public/uploads/products/43d77e77-logofav.jpg (deleted)
+  - public/uploads/products/6dce9881-logofav.jpg (deleted)
+  - public/uploads/products/e3886a4c-logofav.jpg (local, tidak di-commit)
+
+- Verifikasi:
+  - Build: sukses, 23 routes prerendered
+  - Lint: 0 errors
+  - Local dev test: upload via admin UI → file tersimpan ke filesystem lokal,
+    counter "1 / 6" muncul, image preview visible. Log:
+    "[api/upload] Saved to local filesystem: /uploads/products/e3886a4c-logofav.jpg"
+
+GITHUB:
+- Commit b945642: "feat: Vercel Blob storage for image uploads (production-ready)"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Files changed:
+- package.json (add @vercel/blob)
+- bun.lock
+- src/app/api/upload/route.ts (rewrite dual storage path)
+- .env.example (add BLOB_READ_WRITE_TOKEN docs)
+- public/uploads/products/43d77e77-logofav.jpg (deleted, was test file)
+- public/uploads/products/6dce9881-logofav.jpg (deleted, was test file)
+
+Stage Summary:
+- Vercel Blob storage sekarang ter-integrate untuk upload foto produk di produksi
+- Auto-detection via env var: production pakai Vercel Blob, dev pakai filesystem lokal
+- 1GB free tier di Vercel Blob cukup untuk ratusan foto produk
+- User perlu setup BLOB_READ_WRITE_TOKEN di Vercel dashboard (lihat .env.example atau instruksi di atas)
