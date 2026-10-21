@@ -6,6 +6,7 @@ export default defineConfig({
   // Buckets in Neon Object Storage
   buckets: {
     // Bucket for product photos uploaded via admin dashboard
+    // public_read = anyone with URL can GET (no auth needed to view photos)
     "mybucket": { access: "public_read" },
   },
   // Branch policy: per-branch tuning
