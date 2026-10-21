@@ -46,7 +46,15 @@ const VALUES = [
 ];
 
 export default async function TentangPage() {
-  const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+  let settings: Awaited<ReturnType<typeof db.siteSettings.findUnique>> = null;
+  try {
+    settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+  } catch (err) {
+    console.error(
+      "[tentang] DB call failed. Rendering with defaults.",
+      err instanceof Error ? err.message : err,
+    );
+  }
   const whatsappNumber = settings?.whatsappNumber || "";
 
   return (

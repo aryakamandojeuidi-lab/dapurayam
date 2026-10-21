@@ -15,15 +15,27 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [allFeatured, settings] = await Promise.all([
-    db.product.findMany({
-      where: { isActive: true, isFeatured: true },
-      include: { category: true },
-      orderBy: { featuredOrder: "asc" },
-      take: 12,
-    }),
-    db.siteSettings.findUnique({ where: { id: "default" } }),
-  ]);
+  // Defensive: if DB is unreachable (e.g. DATABASE_URL not set, network error,
+  // Prisma client not initialized), fall back to empty arrays/null so the page
+  // still renders with empty state instead of throwing 500.
+  let allFeatured: Awaited<ReturnType<typeof db.product.findMany>> = [];
+  let settings: Awaited<ReturnType<typeof db.siteSettings.findUnique>> = null;
+  try {
+    [allFeatured, settings] = await Promise.all([
+      db.product.findMany({
+        where: { isActive: true, isFeatured: true },
+        include: { category: true },
+        orderBy: { featuredOrder: "asc" },
+        take: 12,
+      }),
+      db.siteSettings.findUnique({ where: { id: "default" } }),
+    ]);
+  } catch (err) {
+    console.error(
+      "[homepage] DB call failed. Rendering with empty state.",
+      err instanceof Error ? err.message : err,
+    );
+  }
 
   const whatsappNumber = settings?.whatsappNumber || "";
   const headline = settings?.heroHeadline || "Ayam Pejantan Premium";

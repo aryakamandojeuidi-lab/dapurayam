@@ -16,17 +16,28 @@ export const metadata: Metadata = {
 };
 
 export default async function ProdukPage() {
-  const [products, categories, settings] = await Promise.all([
-    db.product.findMany({
-      where: { isActive: true },
-      include: { category: true },
-      orderBy: [{ isFeatured: "desc" }, { featuredOrder: "asc" }, { createdAt: "desc" }],
-    }),
-    db.category.findMany({
-      orderBy: { name: "asc" },
-    }),
-    db.siteSettings.findUnique({ where: { id: "default" } }),
-  ]);
+  // Defensive DB — fall back to empty arrays if DB unavailable
+  let products: Awaited<ReturnType<typeof db.product.findMany>> = [];
+  let categories: Awaited<ReturnType<typeof db.category.findMany>> = [];
+  let settings: Awaited<ReturnType<typeof db.siteSettings.findUnique>> = null;
+  try {
+    [products, categories, settings] = await Promise.all([
+      db.product.findMany({
+        where: { isActive: true },
+        include: { category: true },
+        orderBy: [{ isFeatured: "desc" }, { featuredOrder: "asc" }, { createdAt: "desc" }],
+      }),
+      db.category.findMany({
+        orderBy: { name: "asc" },
+      }),
+      db.siteSettings.findUnique({ where: { id: "default" } }),
+    ]);
+  } catch (err) {
+    console.error(
+      "[produk] DB call failed. Rendering with empty state.",
+      err instanceof Error ? err.message : err,
+    );
+  }
 
   const whatsappNumber = settings?.whatsappNumber || "";
 

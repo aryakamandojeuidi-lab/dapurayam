@@ -21,7 +21,15 @@ export const metadata: Metadata = {
 };
 
 export default async function KontakPage() {
-  const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+  let settings: Awaited<ReturnType<typeof db.siteSettings.findUnique>> = null;
+  try {
+    settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+  } catch (err) {
+    console.error(
+      "[kontak] DB call failed. Rendering with defaults.",
+      err instanceof Error ? err.message : err,
+    );
+  }
   const whatsappNumber = settings?.whatsappNumber || "";
   const contactEmail = settings?.contactEmail || "";
 

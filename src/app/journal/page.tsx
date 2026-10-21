@@ -21,18 +21,27 @@ export const metadata: Metadata = {
 
 export default async function JournalPage() {
   const now = new Date();
-  const articles = await db.article.findMany({
-    where: {
-      status: "PUBLISHED",
-      publishedAt: { lte: now },
-    },
-    include: { category: true },
-    orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }],
-  });
+  let articles: Awaited<ReturnType<typeof db.article.findMany>> = [];
+  let categories: Awaited<ReturnType<typeof db.articleCategory.findMany>> = [];
+  try {
+    articles = await db.article.findMany({
+      where: {
+        status: "PUBLISHED",
+        publishedAt: { lte: now },
+      },
+      include: { category: true },
+      orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }],
+    });
 
-  const categories = await db.articleCategory.findMany({
-    orderBy: { name: "asc" },
-  });
+    categories = await db.articleCategory.findMany({
+      orderBy: { name: "asc" },
+    });
+  } catch (err) {
+    console.error(
+      "[journal] DB call failed. Rendering with empty state.",
+      err instanceof Error ? err.message : err,
+    );
+  }
   // Only show categories with at least 1 published article
   const categoriesWithArticles = categories.filter((c) =>
     articles.some((a) => a.category?.slug === c.slug),
