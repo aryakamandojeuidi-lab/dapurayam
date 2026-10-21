@@ -66,3 +66,4 @@ server.log
 
 # Local scripts that operate on local DB (kept locally only)
 /scripts/check-product-galleries.ts
+.neon
