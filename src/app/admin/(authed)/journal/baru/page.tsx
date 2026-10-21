@@ -1,4 +1,5 @@
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -10,6 +11,9 @@ import { ArticleForm } from "@/components/admin/article-form";
 import { saveArticleAction } from "@/actions/article-actions";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 export default async function NewArticlePage() {
   const categories = await db.articleCategory.findMany({ orderBy: { name: "asc" } });
 

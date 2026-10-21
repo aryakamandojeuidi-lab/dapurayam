@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { estimateReadingTime } from "@/lib/markdown";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Journal Dapur Ayam",
   description:

@@ -4,6 +4,10 @@ import { PublicShell } from "@/components/public/public-shell";
 import { ProductSearch } from "@/components/public/product-search";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Produk",
   description:

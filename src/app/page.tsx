@@ -10,6 +10,10 @@ import { FaqSection } from "@/components/public/faq-section";
 import { CtaSection } from "@/components/public/cta-section";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [allFeatured, settings] = await Promise.all([
     db.product.findMany({

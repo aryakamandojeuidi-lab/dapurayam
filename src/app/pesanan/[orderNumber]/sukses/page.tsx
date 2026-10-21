@@ -6,6 +6,7 @@ import { PublicShell } from "@/components/public/public-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
+
   ORDER_STATUS_LABELS,
   ORDER_STATUS_COLORS,
   ORDER_CHANNEL_LABELS,
@@ -15,6 +16,9 @@ import {
 import { buildWhatsAppUrl, buildConsultationMessage } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ orderNumber: string }> };
 
 export default async function OrderSuccessPage({ params }: Props) {

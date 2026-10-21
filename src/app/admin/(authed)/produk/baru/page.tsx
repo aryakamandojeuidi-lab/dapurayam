@@ -1,4 +1,5 @@
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -10,6 +11,9 @@ import { ProductForm } from "@/components/admin/product-form";
 import { saveProductAction } from "@/actions/product-actions";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 export default async function NewProductPage() {
   const categories = await db.category.findMany({ orderBy: { name: "asc" } });
 

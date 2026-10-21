@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -21,6 +22,9 @@ import { db } from "@/lib/db";
 import { estimateReadingTime, generateToc } from "@/lib/markdown";
 import { parseTags } from "@/lib/prisma-helpers";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }> };
 
 const MONTHS = [

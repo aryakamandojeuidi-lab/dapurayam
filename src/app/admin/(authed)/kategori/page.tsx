@@ -1,4 +1,5 @@
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -9,6 +10,9 @@ import {
 import { AdminCategoriesTable } from "@/components/admin/admin-categories-table";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 export default async function AdminKategoriPage() {
   const categories = await db.category.findMany({
     include: { _count: { select: { products: true } } },

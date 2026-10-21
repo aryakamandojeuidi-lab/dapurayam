@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+
   Package,
   Newspaper,
   CheckCircle2,
@@ -19,6 +20,9 @@ import {
   formatCurrency,
 } from "@/lib/order-display";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
   "Jul", "Agu", "Sep", "Okt", "Nov", "Des",

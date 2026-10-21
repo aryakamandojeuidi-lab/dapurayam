@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -11,6 +12,9 @@ import { ArticleForm } from "@/components/admin/article-form";
 import { saveArticleAction } from "@/actions/article-actions";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditArticlePage({ params }: Props) {

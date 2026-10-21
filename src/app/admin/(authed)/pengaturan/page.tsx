@@ -9,6 +9,9 @@ import {
 import { SiteSettingsForm } from "@/components/admin/site-settings-form";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 export default async function AdminPengaturanPage() {
   const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
 
