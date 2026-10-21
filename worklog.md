@@ -996,3 +996,89 @@ Stage Summary:
 - Solusi: try/catch dengan graceful fallback ke default values (businessName="Dapur Ayam", whatsapp="", dst)
 - Runtime behavior unchanged: di production dengan DB available, settings tetap di-load normal
 - Build verified: 23 routes ter-prerender semua sukses, 0 error
+
+---
+Task ID: DapurAyam-NeonPostgresSetup
+Agent: main (Super Z)
+Task: Set up Neon Postgres untuk produksi + fix build Vercel.
+
+Work Log:
+- User berikan Neon connection string: postgresql://neondb_owner:***@ep-snowy-heart-b3hp3rox-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+- Update .env: DATABASE_URL dari SQLite file path → Neon connection string
+  (Note: Hilangkan channel_binding=require karena Prisma mengalami issue parsing
+   dengan parameter itu di env var, hanya pakai sslmode=require)
+
+- Update prisma/schema.prisma: provider = "sqlite" → "postgresql"
+
+- Bug awal: `bun run db:push` gagal dengan "Environment variable not found: DATABASE_URL"
+  Root cause: shell env var lama (DATABASE_URL=file:...SQLite) mewariskan env
+  yang override file .env. Solution: `unset DATABASE_URL` sebelum perintah prisma.
+
+- Run `unset DATABASE_URL && bun run db:push`:
+  - Prisma generate client baru untuk PostgreSQL ✓
+  - Schema applied ke Neon: 8 tabel dibuat (AdminUser, Category, Product,
+    ArticleCategory, Article, SiteSettings, Order, OrderItem) ✓
+
+- Run `unset DATABASE_URL && bun run prisma/seed.ts`:
+  - 1 admin user (admin@dapurayam.com, bcrypt hash) ✓
+  - 2 categories: Ayam Bumbu Nusantara, Olahan Ayam ✓
+  - 4 products: Bumbu Rujak, Bali, Chicken Nugget, Bumbu Ungkep ✓
+  - 5 article categories ✓
+  - 5 draft articles ✓
+  - SiteSettings row ✓
+
+- Run realign script (scripts/realign-neon-final.ts):
+  - Rename "Bumbu Ungkep" → "Ayam Pejantan Bumbu Kuning" (Rp 35.000)
+  - Update Bumbu Bali price 32000 → 35000
+  - Rename "Chicken Nugget Isi Keju" → "Chicken Nugget Premium" (78% chicken)
+  - Bumbu Rujak price update ke 35000
+  - Assign kategori: 3 ayam bumbu → "Ayam Bumbu Nusantara", nugget → "Olahan Ayam"
+  - Update SiteSettings: heroHeadline, heroSubtext, whatsappNumber, address, dll
+
+- Restart dev server dengan unset DATABASE_URL untuk pakai Neon:
+  - Bug awal: dev.sh gagal karena inherit DATABASE_URL=SQLite dari parent shell
+  - Fix: start dev.sh dengan bash -c 'unset DATABASE_URL; ...'
+
+- Verifikasi via Agent Browser (Neon terhubung):
+  - GET / 200 OK (Postgres query log: SELECT FROM "public"."Product")
+  - Homepage menampilkan: hero "Ayam Pejantan Premium", 4 produk semua Rp 35.000:
+    Bumbu Kuning (Best Seller), Bali, Rujak, Chicken Nugget Premium
+  - /produk: 4 product cards terlihat
+  - /produk/chicken-nugget: detail page 200
+  - /admin/login: login form muncul
+  - /admin/login → submit credentials (admin@dapurayam.com / dapurayam-admin-2026)
+    → redirect to /admin/dashboard ✓
+  - /admin/produk: 4 products terlihat di admin table ✓
+  - Journal routes 200 OK
+
+- Build test (simulasi Vercel):
+  - `unset DATABASE_URL && bun run build` → sukses tanpa DATABASE_URL set
+  - 23 routes ter-prerender:
+    - Static (○): /_not-found, /admin, /admin/login, /checkout, /keranjang, /robots.txt
+    - Dynamic (ƒ): semua page yang pakai DB (/ , /produk, /admin/*, /journal, dll)
+  - Tidak ada error build
+
+- Lint: 0 errors
+
+GITHUB:
+- Commit 5e674ab: "feat: switch Prisma from SQLite to Neon Postgres (production-ready)"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Files changed:
+- .env (DATABASE_URL → Neon connection string)
+- prisma/schema.prisma (provider sqlite → postgresql)
+Files created (temporary):
+- scripts/realign-neon-final.ts (realign data ke Neon — dihapus setelah run)
+
+Stage Summary:
+- Database production-ready: Neon Postgres terhubung, schema applied,
+  seed data lengkap (admin + 4 produk + 2 kategori + 5 artikel)
+- Build berhasil tanpa DATABASE_URL (semua DB page jadi dynamic)
+- Verifikasi end-to-end via Agent Browser:
+  - Homepage render data dari Neon Postgres ✓
+  - 4 produk semua Rp 35.000, kategori "Ayam Bumbu Nusantara" + "Olahan Ayam" ✓
+  - Admin login (admin@dapurayam.com) bekerja ke DB Neon ✓
+  - Admin dashboard, products, journal routes semua OK ✓
+- Siap deploy ke Vercel: user tinggal set 3 env vars (DATABASE_URL,
+  NEXTAUTH_SECRET, NEXTAUTH_URL) di Vercel dashboard lalu Redeploy
