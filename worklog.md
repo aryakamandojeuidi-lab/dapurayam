@@ -956,3 +956,43 @@ Stage Summary:
 - 1 produk bisa punya 2-7 foto (1 utama + hingga 6 galeri), terverifikasi di halaman detail: 3 thumbnail + main image dengan active ring
 - 0 lint error, semua route 200 OK
 - Push ke GitHub sukses: commit 68c7609 live di github.com/aryakamandojeuidi-lab/dapurayam
+
+---
+Task ID: DapurAyam-FixBuildPrerenderDBError
+Agent: main (Super Z)
+Task: Fix error build "Environment variable not found: DATABASE_URL" saat prerender /_not-found page.
+
+Work Log:
+- Root cause: RootLayout (src/app/layout.tsx) dan PublicShell (src/components/public/public-shell.tsx) keduanya async server components yang langsung call `db.siteSettings.findUnique()` saat render.
+- Saat `next build` jalan, Next.js prerender static pages termasuk `/_not-found`. Page ini pakai root layout yang call DB.
+- Di environment build (terutama Vercel), DATABASE_URL mungkin belum tersedia saat build (env var hanya runtime-only, atau belum di-set karena DB belum di-provision). Hasilnya: PrismaClientInitializationError → build gagal.
+
+- Fix:
+  - src/app/layout.tsx: wrap `db.siteSettings.findUnique()` dalam try/catch
+  - src/components/public/public-shell.tsx: wrap dalam try/catch
+  - Pada error: log warning via console.warn + fallback ke defaults (null settings, "Dapur Ayam" sebagai businessName placeholder)
+  - Behavior runtime TIDAK berubah: di production dengan DB available, settings tetap di-load normal
+  - Behavior build berubah: jika DB unavailable, build tetap berhasil (dengan default values yang aman)
+
+- Verifikasi: `bun run build` sukses, semua 23 routes ter-prerender:
+  - /_not-found: ○ (static, sukses — sebelumnya crash)
+  - /: ○ static
+  - /produk, /journal, /kontak, /tentang: ○ static
+  - /produk/[slug], /journal/[slug], /admin/*: ƒ dynamic
+  - /robots.txt, /sitemap.xml: ○ static
+- Lint: 0 errors
+
+Files changed:
+- src/app/layout.tsx (try/catch DB call)
+- src/components/public/public-shell.tsx (try/catch DB call)
+
+GITHUB:
+- Commit dedac94: "fix: graceful DB fallback during build prerender"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Stage Summary:
+- Bug fix: build sekarang bisa jalan di environment tanpa DATABASE_URL tersedia saat build (misalnya Vercel preview deployment, fresh clone, atau CI yang hanya set env runtime)
+- Root cause: RootLayout + PublicShell keduanya async dengan direct DB call, dipakai oleh _not-found yang di-prerender saat build
+- Solusi: try/catch dengan graceful fallback ke default values (businessName="Dapur Ayam", whatsapp="", dst)
+- Runtime behavior unchanged: di production dengan DB available, settings tetap di-load normal
+- Build verified: 23 routes ter-prerender semua sukses, 0 error
