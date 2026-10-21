@@ -277,15 +277,20 @@ export function ProductForm({
 
           <Card>
             <CardHeader>
-              <CardTitle>Gambar Produk</CardTitle>
+              <CardTitle>Foto Produk</CardTitle>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Satu produk bisa punya beberapa foto. Foto Utama akan tampil di
+                katalog, dan Foto Tambahan akan tampil sebagai galeri thumbnail
+                di halaman detail produk.
+              </p>
             </CardHeader>
             <CardContent>
-              <ImageUploader value={imageUrl} onChange={setImageUrl} label="Foto Utama" />
+              <ImageUploader value={imageUrl} onChange={setImageUrl} label="Foto Utama (tampil di katalog)" />
               <div className="mt-6 border-t border-border pt-6">
                 <GalleryUploader
                   value={galleryImages}
                   onChange={setGalleryImages}
-                  label="Galeri Foto Tambahan"
+                  label="Foto Tambahan (galeri di halaman detail)"
                   max={6}
                 />
               </div>
