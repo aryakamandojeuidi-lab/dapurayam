@@ -1082,3 +1082,65 @@ Stage Summary:
   - Admin dashboard, products, journal routes semua OK ✓
 - Siap deploy ke Vercel: user tinggal set 3 env vars (DATABASE_URL,
   NEXTAUTH_SECRET, NEXTAUTH_URL) di Vercel dashboard lalu Redeploy
+
+---
+Task ID: DapurAyam-VercelErrorFix-DefensiveDB
+Agent: main (Super Z)
+Task: Fix Vercel deployment error "Application error: a server-side exception has occurred" (Digest: 3759722112).
+
+Work Log:
+- User deployed ke Vercel dapurayam-2ltcalpux-aryakamandojeuidigmailcoms-projects.vercel.app, dapat error generic.
+- Root cause hypothesis: env vars belum di-set dengan benar di Vercel, atau DATABASE_URL memakai &channel_binding=require yang bikin Prisma crash saat parsing env var.
+- Penyebab langsung: page (server component) lempar exception saat DB call, tidak ada try/catch fallback, jadi page 500.
+
+- Fix:
+  1. Wrap DB calls di try/catch dengan graceful fallback untuk semua public page:
+     - src/app/page.tsx (homepage): try/catch Promise.all → empty array + null
+     - src/app/produk/page.tsx: try/catch → empty products/categories, null settings
+     - src/app/journal/page.tsx: try/catch → empty articles/categories
+     - src/app/kontak/page.tsx: try/catch → null settings
+     - src/app/tentang/page.tsx: try/catch → null settings
+     - (src/app/layout.tsx, public-shell.tsx, sitemap.ts sudah di-commit sebelumnya)
+     Saat DB unavailable, page render dengan empty state (produk kosong, settings default) bukan throw 500.
+
+  2. Buat global error boundary (src/app/error.tsx):
+     - "use client" component dengan reset() handler
+     - Halaman error friendly (Indonesia): "Halaman tidak dapat dimuat"
+     - Smart hint detection:
+       - Jika error mengandung "DATABASE_URL" atau "PrismaClientInitializationError" → tampilkan box kuning dengan instruksi setup DATABASE_URL di Vercel
+       - Jika error mengandung "NEXTAUTH_SECRET" atau "NEXTAUTH_URL" → tampilkan box kuning instruksi setup auth env vars
+     - Di dev mode: tampilkan error.message + digest untuk debugging
+     - 2 tombol: "Coba Lagi" (reset()) + "Ke Beranda" (Link ke /)
+     - Styling inline (tanpa Tailwind) supaya boundary bekerja walau globals.css gagal load
+
+  3. Remove invalid prop `priority` dari <img> tag di hero-section.tsx
+     (priority hanya valid untuk next/image, bukan <img> HTML biasa)
+     Sebelumnya warning: "Received true for a non-boolean attribute priority"
+
+- Verifikasi:
+  - bun run build: sukses, 23 routes ter-prerender
+  - Test dengan bad DATABASE_URL (nonexistent-host-12345.example.com):
+    - GET / → 200 OK (sebelumnya 500)
+    - Log: "[PublicShell] Could not load SiteSettings from DB. Using defaults."
+    - Page render dengan empty state (tidak ada produk, default businessName "Dapur Ayam")
+  - Lint: 0 errors
+
+GITHUB:
+- Commit 6c44bf8: "fix: defensive DB error handling + friendly error boundary"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Files changed:
+- src/app/page.tsx (try/catch DB)
+- src/app/produk/page.tsx (try/catch DB)
+- src/app/journal/page.tsx (try/catch DB)
+- src/app/kontak/page.tsx (try/catch DB)
+- src/app/tentang/page.tsx (try/catch DB)
+- src/components/public/hero-section.tsx (remove priority prop)
+Files created:
+- src/app/error.tsx (global error boundary dengan setup hints)
+
+Stage Summary:
+- Vercel error yang user lihat kemungkinan karena DATABASE_URL belum di-set atau memakai &channel_binding=require
+- Dengan fix ini, page akan render dengan empty state (bukan crash) jika DB unavailable
+- Error boundary kasih user petunjuk konkret apa yang harus dilakukan (set env vars di Vercel)
+- Build sukses + test dengan bad DB tetap 200 OK
