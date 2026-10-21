@@ -865,3 +865,94 @@ Stage Summary:
 - Endpoint /api/upload baru: admin-only, validasi MIME + size, simpan ke filesystem lokal. Untuk produksi sebaiknya pindah ke S3/Vercel Blob, tapi untuk MVP sudah cukup.
 - GitHub: repo dapurayam (public) di github.com/aryakamandojeuidi-lab/dapurayam sudah berisi commit 146912e dengan semua code. Remote URL diset ke clean HTTPS (PAT tidak disimpan di git config). .env.example disediakan untuk setup pengguna baru.
 - PAT user hanya dipakai untuk auth push awal, tidak disimpan permanen di mana pun.
+
+---
+Task ID: DapurAyam-NewCategories-ImprovedGalleryUI
+Agent: main (Super Z)
+Task: Buat 2 kategori baru (Ayam Bumbu Nusantara + Olahan Ayam) dan perbaiki UI gallery agar lebih jelas bahwa 1 produk bisa punya 2-3 foto.
+
+Work Log:
+- Cek state existing: fitur multi-foto gallery SEBENARNYA SUDAH BERFUNGSI sejak commit sebelumnya:
+  - Ayam Pejantan Bumbu Kuning: imageUrl + 2 galleryImages = 3 foto total
+  - Chicken Nugget Premium: imageUrl + 1 galleryImages = 2 foto total
+  - Tapi UI kurang intuitif + label kurang jelas sehingga user mengira fitur belum ada
+
+- Buat scripts/setup-categories.ts untuk replace kategori lama:
+  - Kategori LAMA yang dihapus: "Ayam Bumbu", "Ayam Ungkep", "Nugget" (3 kategori)
+  - Kategori BARU:
+    - "Ayam Bumbu Nusantara" (slug: ayam-bumbu-nusantara) — untuk Bumbu Kuning, Bali, Rujak, dll
+    - "Olahan Ayam" (slug: olahan-ayam) — untuk nugget, karaage, dan olahan lainnya
+  - Assign products:
+    - Bumbu Kuning → Ayam Bumbu Nusantara
+    - Bumbu Bali → Ayam Bumbu Nusantara
+    - Bumbu Rujak → Ayam Bumbu Nusantara
+    - Chicken Nugget Premium → Olahan Ayam
+  - Detach produk dari kategori lama sebelum delete
+
+- Run script → final state:
+  - Ayam Bumbu Nusantara (3 produk)
+  - Olahan Ayam (1 produk)
+
+- Update prisma/seed.ts:
+  - Replace 3 productCategories dengan 2 baru
+  - Update categorySlug di setiap produk: "ayam-bumbu"/"ayam-ungkep" → "ayam-bumbu-nusantara", "nugget" → "olahan-ayam"
+
+- Rebuild GalleryUploader (src/components/admin/gallery-uploader.tsx) untuk UI lebih intuitif:
+  - Card title: "Foto Produk" dengan subtitle penjelasan
+    "Satu produk bisa punya beberapa foto. Foto Utama akan tampil di katalog,
+     dan Foto Tambahan akan tampil sebagai galeri thumbnail di halaman detail produk."
+  - Label "Foto Utama (tampil di katalog)" untuk ImageUploader existing
+  - Label "Foto Tambahan (galeri di halaman detail)" untuk GalleryUploader
+  - Counter badge "X / 6" (warna primary saat full, secondary saat belum)
+  - Setiap thumbnail punya label "Foto 2", "Foto 3", dst (Foto 1 = foto utama)
+  - Empty state hint: "Belum ada foto tambahan. Upload atau tambahkan URL foto di bawah."
+  - File upload input + OR divider + URL paste input dengan tombol "Tambah"
+  - Hapus button (×) di pojok kanan atas setiap thumbnail
+
+- Verifikasi via Agent Browser:
+  1. Login admin sukses → /admin/dashboard
+  2. /admin/kategori: 2 kategori baru terlihat (Ayam Bumbu Nusantara, Olahan Ayam)
+  3. /admin/produk/[id]/edit:
+     - Card "Foto Produk" terlihat dengan subtitle penjelasan
+     - Section "Foto Utama (tampil di katalog)" terlihat
+     - Section "Foto Tambahan (galeri di halaman detail)" terlihat dengan counter "2 / 6"
+     - 2 thumbnail terlihat dengan label "FOTO 2" dan "FOTO 3"
+  4. /produk/ayam-penjantan-bumbu-ungkep:
+     - Main image terlihat
+     - 3 thumbnail terlihat (1 foto utama + 2 galeri)
+     - Thumbnail pertama aktif dengan red border/ring
+  5. /produk catalog page:
+     - Filter buttons: Semua | Ayam Bumbu Nusantara | Olahan Ayam
+     - 4 product cards: Bumbu Kuning, Bali, Rujak, Nugget (semua Rp 35.000)
+  6. Click "Olahan Ayam" filter → hanya Chicken Nugget Premium yang muncul ✓
+
+Lint: 0 errors
+Dev log: semua route 200 OK
+
+Files changed:
+- prisma/seed.ts (3 kategori lama → 2 kategori baru, update categorySlug)
+- src/components/admin/gallery-uploader.tsx (rebuild UI lebih intuitif)
+- src/components/admin/product-form.tsx (card title + subtitle + label lebih jelas)
+Files created:
+- scripts/setup-categories.ts (reusable untuk reset kategori)
+
+GITHUB:
+- Commit 68c7609: "feat: new categories (Ayam Bumbu Nusantara + Olahan Ayam) + improved gallery UI"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+- PAT dipakai hanya untuk auth push (one-time via embedded URL), tidak disimpan di git config
+
+Stage Summary:
+- 2 kategori baru sesuai request user:
+  - "Ayam Bumbu Nusantara" — untuk ayam berbumbu khas Nusantara (Bumbu Kuning, Bali, Rujak)
+  - "Olahan Ayam" — untuk produk olahan ayam (nugget, karaage, dll)
+- Kategori lama (Ayam Bumbu, Ayam Ungkep, Nugget) sudah dihapus dari DB
+- UI gallery di admin dashboard sekarang lebih intuitif:
+  - Card "Foto Produk" dengan subtitle yang jelas: "Satu produk bisa punya beberapa foto"
+  - Counter "X / 6" dengan badge warna
+  - Label per thumbnail "Foto 2", "Foto 3" (Foto 1 = foto utama)
+  - Empty state hint saat belum ada galeri
+  - File upload + URL paste dengan divider "atau paste URL gambar"
+- Filter kategori di /produk catalog page berfungsi: "Olahan Ayam" filter hanya tampilkan Chicken Nugget Premium
+- 1 produk bisa punya 2-7 foto (1 utama + hingga 6 galeri), terverifikasi di halaman detail: 3 thumbnail + main image dengan active ring
+- 0 lint error, semua route 200 OK
+- Push ke GitHub sukses: commit 68c7609 live di github.com/aryakamandojeuidi-lab/dapurayam
