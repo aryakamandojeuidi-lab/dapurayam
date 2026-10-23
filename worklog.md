@@ -1206,3 +1206,54 @@ Stage Summary:
 - Auto-detection via env var: production pakai Vercel Blob, dev pakai filesystem lokal
 - 1GB free tier di Vercel Blob cukup untuk ratusan foto produk
 - User perlu setup BLOB_READ_WRITE_TOKEN di Vercel dashboard (lihat .env.example atau instruksi di atas)
+
+---
+Task ID: DapurAyam-RestoreUploadRoute-MergeConflictFix
+Agent: main (Super Z)
+Task: Restore upload route yang kehapus saat merge conflict + verify upload jalan.
+
+Work Log:
+- User kirim credentials Neon S3 lagi (sama dengan sebelumnya)
+- Saya cek .env: sudah reset ke SQLite (start.sh script overwrite ulang)
+- Tulis ulang .env dengan credentials Neon yang user kirim
+- Restart dev server, login admin, test upload via dashboard
+- Upload gagal 500 "Failed to find Server Action" — error Next.js aneh
+- Investigasi: `find src/app/api -type f` → hanya `route.ts` (root) dan `auth/[...nextauth]/route.ts`
+- **File `src/app/api/upload/route.ts` TIDAK ADA** — kehapus saat merge sebelumnya
+- Check git history: file ada di commit 3095e39, tapi setelah merge commit a891456 file hilang
+- Root cause: saat merge conflict resolution sebelumnya, saya pakai `git checkout --theirs`
+  untuk beberapa file, dan file upload route mungkin dihapus dari working tree saat itu
+
+- Fix: restore upload route dari commit 3095e39
+  ```bash
+  mkdir -p src/app/api/upload
+  git show 3095e39:src/app/api/upload/route.ts > src/app/api/upload/route.ts
+  ```
+- Verify file ada (153 lines, hybrid upload route dengan Neon S3 + Vercel Blob + filesystem fallback)
+- Verify package.json punya @aws-sdk/client-s3 + @vercel/blob (already there)
+- Restart dev server
+
+- Test upload via admin dashboard:
+  - Login admin → /admin/produk → Edit product → Choose File → upload logofav.jpg
+  - Counter: "1 / 6" (foto tersimpan) ✓
+  - Log dev: 
+    "[api/upload] Neon S3 failed, falling through to next backend: UnknownError"
+    "[api/upload] Saved to local filesystem: /uploads/products/b5f67f63-logofav.jpg"
+    "POST /api/upload 200 in 1902ms"
+  - Neon S3 tetap gagal 403 (Neon backend issue di ap-southeast-1)
+  - Fallback ke filesystem: BERHASIL ✓
+
+- Clean up test file: hapus /public/uploads/products/b5f67f63-logofav.jpg
+- Commit: "fix: restore /api/upload route deleted during merge" (commit 68ea61a)
+- Push ke GitHub sukses
+
+GITHUB:
+- Commit 68ea61a: "fix: restore /api/upload route deleted during merge"
+- Push sukses ke github.com/aryakamandojeuidi-lab/dapurayam
+
+Stage Summary:
+- Bug fix: upload route yang kehapus saat merge sudah di-restore
+- Upload via admin dashboard verified end-to-end (counter 1/6, status 200)
+- Neon S3 masih gagal 403 (Neon backend issue di ap-southeast-1, bukan credentials)
+- Filesystem fallback tetap jalan untuk local dev
+- Vercel Blob tetap opsi paling reliable untuk production (tinggal set BLOB_READ_WRITE_TOKEN)
