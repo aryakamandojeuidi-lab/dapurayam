@@ -30,6 +30,7 @@ export async function createProductAction(formData: FormData) {
     shopeeUrl: String(formData.get("shopeeUrl") || "") || null,
     tokopediaUrl: String(formData.get("tokopediaUrl") || "") || null,
     websiteOrderEnabled: formData.get("websiteOrderEnabled") === "true",
+    galleryImages: String(formData.get("galleryImages") || "") || null,
   };
 
   const parsed = productSchema.safeParse(raw);
@@ -55,6 +56,7 @@ export async function createProductAction(formData: FormData) {
         shopeeUrl: parsed.data.shopeeUrl || null,
         tokopediaUrl: parsed.data.tokopediaUrl || null,
         websiteOrderEnabled: parsed.data.websiteOrderEnabled ?? true,
+        galleryImages: raw.galleryImages || null,
         relatedArticleIds: safeStringifyArray(parsed.data.relatedArticleIds || []),
       },
     });
@@ -96,6 +98,7 @@ export async function updateProductAction(id: string, formData: FormData) {
     shopeeUrl: String(formData.get("shopeeUrl") || "") || null,
     tokopediaUrl: String(formData.get("tokopediaUrl") || "") || null,
     websiteOrderEnabled: formData.get("websiteOrderEnabled") === "true",
+    galleryImages: String(formData.get("galleryImages") || "") || null,
   };
 
   const parsed = productSchema.safeParse(raw);
@@ -122,6 +125,7 @@ export async function updateProductAction(id: string, formData: FormData) {
         shopeeUrl: parsed.data.shopeeUrl || null,
         tokopediaUrl: parsed.data.tokopediaUrl || null,
         websiteOrderEnabled: parsed.data.websiteOrderEnabled ?? true,
+        galleryImages: raw.galleryImages || null,
         relatedArticleIds: safeStringifyArray(parsed.data.relatedArticleIds || []),
       },
     });

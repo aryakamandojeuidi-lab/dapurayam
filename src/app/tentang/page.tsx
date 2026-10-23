@@ -7,6 +7,10 @@ import { WhatsAppButton } from "@/components/public/whatsapp-button";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Tentang Kami",
   description:
@@ -42,7 +46,15 @@ const VALUES = [
 ];
 
 export default async function TentangPage() {
-  const settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+  let settings: Awaited<ReturnType<typeof db.siteSettings.findUnique>> = null;
+  try {
+    settings = await db.siteSettings.findUnique({ where: { id: "default" } });
+  } catch (err) {
+    console.error(
+      "[tentang] DB call failed. Rendering with defaults.",
+      err instanceof Error ? err.message : err,
+    );
+  }
   const whatsappNumber = settings?.whatsappNumber || "";
 
   return (

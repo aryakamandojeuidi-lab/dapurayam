@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { GalleryUploader } from "@/components/admin/gallery-uploader";
 import { useToast } from "@/hooks/use-toast";
 import { slugify } from "@/lib/prisma-helpers";
+import { parseGalleryImages, serializeGalleryImages } from "@/lib/gallery";
 
 type Category = { id: string; name: string };
 
@@ -43,6 +45,7 @@ type Props = {
     shopeeUrl?: string | null;
     tokopediaUrl?: string | null;
     websiteOrderEnabled?: boolean | null;
+    galleryImages?: string[] | null;
   };
   categories: Category[];
   submitLabel?: string;
@@ -78,6 +81,9 @@ export function ProductForm({
   const [websiteOrderEnabled, setWebsiteOrderEnabled] = useState(
     initialData?.websiteOrderEnabled ?? true,
   );
+  const [galleryImages, setGalleryImages] = useState<string[]>(
+    parseGalleryImages(initialData?.galleryImages as unknown as string | null | undefined),
+  );
 
   const onNameChange = (v: string) => {
     setName(v);
@@ -112,6 +118,8 @@ export function ProductForm({
     formData.set("shopeeUrl", shopeeUrl);
     formData.set("tokopediaUrl", tokopediaUrl);
     formData.set("websiteOrderEnabled", String(websiteOrderEnabled));
+    // Gallery images stored as JSON string in DB
+    formData.set("galleryImages", serializeGalleryImages(galleryImages));
 
     const res = await action(formData);
     setLoading(false);
@@ -269,10 +277,23 @@ export function ProductForm({
 
           <Card>
             <CardHeader>
-              <CardTitle>Gambar Produk</CardTitle>
+              <CardTitle>Foto Produk</CardTitle>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Satu produk bisa punya beberapa foto. Foto Utama akan tampil di
+                katalog, dan Foto Tambahan akan tampil sebagai galeri thumbnail
+                di halaman detail produk.
+              </p>
             </CardHeader>
             <CardContent>
-              <ImageUploader value={imageUrl} onChange={setImageUrl} />
+              <ImageUploader value={imageUrl} onChange={setImageUrl} label="Foto Utama (tampil di katalog)" />
+              <div className="mt-6 border-t border-border pt-6">
+                <GalleryUploader
+                  value={galleryImages}
+                  onChange={setGalleryImages}
+                  label="Foto Tambahan (galeri di halaman detail)"
+                  max={6}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>

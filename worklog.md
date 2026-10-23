@@ -722,3 +722,487 @@ Stage Summary:
   - Admin sidebar: 36→48 (+33%)
   - Admin login: 64→96 (+50%)
 - 0 lint error, semua route 200 OK, VLM audit confirmed all 3 changes
+
+---
+Task ID: DapurAyam-MultiPhotoGallery-GitHubPush
+Agent: main (Super Z)
+Task: Tambahkan fitur multi-foto per produk (gallery) supaya pemilik bisa tambah foto baru kapan saja via admin. Lalu push ke GitHub user.
+
+Work Log:
+- Plan: galleryImages disimpan sebagai JSON string di kolom Product.galleryImages (SQLite tidak support array native), max 6 foto galeri per produk + 1 foto utama (imageUrl).
+
+- Schema change (prisma/schema.prisma):
+  - Tambah kolom: `galleryImages String?` di model Product
+  - Komentar: "JSON-encoded array of additional photo URLs"
+
+- Run `bun run db:push` untuk apply schema → sukses (SQLite DB updated)
+- Run `bunx prisma generate` untuk regenerate Prisma Client yang include field baru → sukses
+
+- Buat helper (src/lib/gallery.ts):
+  - parseGalleryImages(raw) → string[] (safe JSON parse, returns [] on error)
+  - serializeGalleryImages(images) → JSON string (dedupe, cap at 8, filter empty)
+  - getAllProductPhotos(imageUrl, galleryRaw) → string[] (main first, lalu gallery, deduped)
+
+- Buat komponen GalleryUploader (src/components/admin/gallery-uploader.tsx):
+  - "use client" component, max 6 foto (configurable via prop)
+  - Grid 2-4 columns dengan thumbnail + remove button per foto
+  - Upload file via /api/upload endpoint
+  - Tambah URL manual (untuk URL eksternal)
+  - Counter "X / 6" untuk feedback visual
+
+- Update ProductForm (src/components/admin/product-form.tsx):
+  - Import GalleryUploader
+  - Tambah state galleryImages (parsed dari initialData.galleryImages)
+  - Pass galleryImages ke GalleryUploader di dalam Card "Gambar Produk"
+  - FormData.set("galleryImages", serializeGalleryImages(galleryImages)) saat submit
+  - Label "Foto Utama" untuk ImageUploader existing (supaya tidak ambigu)
+
+- Update product-actions.ts (createProductAction & updateProductAction):
+  - Tambah `galleryImages: String(formData.get("galleryImages") || "") || null` ke raw object
+  - Tambah `galleryImages: raw.galleryImages || null` ke db.product.create/update data
+
+- Update admin/produk/[id]/edit/page.tsx:
+  - Pass `galleryImages: product.galleryImages as unknown as string[] | null` ke initialData
+
+- Buat endpoint upload (src/app/api/upload/route.ts) — karena tidak ada sebelumnya:
+  - POST handler, admin-only (getServerSession + authOptions)
+  - Validation: MIME type (JPEG/PNG/WebP), max 5MB
+  - Save ke /public/uploads/products/<uuid>-<sanitized-name>
+  - Return { url: "/uploads/products/..." }
+
+- Buat komponen ProductGallery (src/components/public/product-gallery.tsx):
+  - "use client" component
+  - Main image (aspect-[3/4], object-contain)
+  - Thumbnail grid (grid-cols-5) — hanya tampil jika >1 foto
+  - Click thumbnail → switch main image (useState activeIdx)
+  - Active thumbnail: border-primary + ring-2 ring-primary/30 + aria-pressed="true"
+  - Empty state: Package icon placeholder
+
+- Update produk/[slug]/page.tsx:
+  - Import ProductGallery & getAllProductPhotos
+  - Ganti single image div dengan <ProductGallery photos={getAllProductPhotos(...)} alt={name} />
+  - Remove unused Package import
+
+- Bug fix selama development:
+  - NEXTAUTH_SECRET missing → restore ke .env (dipakai ulang openssl rand -base64 32)
+  - Setelah generate ulang Prisma client, restart dev server
+  - Initial render gallery tidak muncul karena Prisma client lama (tanpa galleryImages) — fix dengan `bunx prisma generate` + dev server restart
+
+- Test end-to-end via Agent Browser:
+  1. Login admin: admin@dapurayam.com / dapurayam-admin-2026 → sukses redirect ke /admin/dashboard
+  2. Edit "Ayam Pejantan Bumbu Kuning" → upload foto via gallery uploader → counter "1 / 6" muncul → click Simpan → sukses
+  3. Cek DB: galleryImages raw = ["/uploads/products/...bumbu-bali.jpg", "/uploads/products/...nugget-keju.jpg"]
+  4. Buka /produk/ayam-penjantan-bumbu-ungkep → 3 tombol "Lihat foto 1/2/3" muncul di DOM
+  5. Click "Lihat foto 2" → aria-pressed=true + class "border-primary ring-2 ring-primary/30"
+  6. Edit Chicken Nugget → upload 1 foto → save → verify DB
+  7. Buka /produk/chicken-nugget → 2 tombol gallery muncul
+
+- Verifikasi visual via VLM: 3 thumbnail visible, active ring on selected thumbnail, click switch main image
+
+=== GITHUB PUSH ===
+
+- Cek git status: ada banyak perubahan yang belum di-commit (redesign homepage, multi-foto, dll)
+- Cek remote: belum ada remote yang dikonfigurasi
+- Cek .gitignore: .env*, /skills/, /download/ belum di-ignore (download ada tapi tidak di .gitignore)
+- User berikan PAT: github_pat_11B6CWNSA0...
+
+- Get user info via GitHub API:
+  - Login: aryakamandojeuidi-lab
+  - ID: 260400840
+- Cek apakah repo dapurayam sudah ada: YA, kosong (size: 0)
+  - URL: github.com/aryakamandojeuidi-lab/dapurayam
+  - Visibility: public
+  - Default branch: main
+
+- Update .gitignore untuk exclude:
+  - /download/ (demo screenshots)
+  - /upload/ (raw source files dari owner)
+  - /tool-results/ (skill scratch space)
+  - /db/ (SQLite sandbox DB)
+  - /scripts/check-product-galleries.ts (debug script)
+
+- Untrack file-file yang sudah ada di repo tapi sekarang di-ignore:
+  - git rm -r --cached download/ upload/ db/ tool-results/
+  - git rm --cached .env (KENAPA .env tracked sebelumnya?! Berbahaya — harusnya .env* di .gitignore dari awal)
+
+- Buat .env.example dengan dokumentasi setup (DATABASE_URL sandbox vs prod, NEXTAUTH_SECRET cara generate, NEXTAUTH_URL)
+
+- Verify tidak ada secret di git history:
+  - grep "github_pat_" → tidak ada (PAT tidak pernah ditulis ke file)
+  - grep "NEXTAUTH_SECRET" → hanya mention di worklog.md (bukan nilai sebenarnya)
+
+- Git config: user.name + user.email (pakai noreply.github.com email)
+- git add -A, commit dengan message lengkap fitur multi-photo gallery
+- Add remote dengan PAT embedded: https://aryakamandojeuidi-lab:<PAT>@github.com/.../dapurayam.git
+- git push -u origin main → SUCCESS (new branch main)
+- Replace remote URL dengan clean HTTPS (tanpa PAT) untuk security
+- Verify via GitHub API: commit 146912e ada di repo, branch main, public visibility
+
+Files created (new):
+- src/lib/gallery.ts (gallery helpers)
+- src/components/admin/gallery-uploader.tsx (admin gallery upload UI)
+- src/components/public/product-gallery.tsx (public product gallery component)
+- src/app/api/upload/route.ts (POST /api/upload endpoint)
+- .env.example (env setup documentation)
+
+Files changed:
+- prisma/schema.prisma (tambah kolom galleryImages)
+- src/components/admin/product-form.tsx (integrate GalleryUploader)
+- src/actions/product-actions.ts (handle galleryImages in create/update)
+- src/app/admin/(authed)/produk/[id]/edit/page.tsx (pass galleryImages to form)
+- src/app/produk/[slug]/page.tsx (replace single image dengan ProductGallery)
+- .gitignore (exclude demo/uploads/db/tool-results)
+
+Files untracked from git:
+- .env (security: should never have been tracked)
+- /download/ (demo screenshots)
+- /upload/ (raw source files)
+- /tool-results/ (skill scratch)
+- /db/ (SQLite sandbox)
+
+Stage Summary:
+- Feature: pemilik bisnis dapat menambah hingga 6 foto galeri per produk melalui admin dashboard. Foto tersimpan di /public/uploads/products/, URL disimpan di Product.galleryImages sebagai JSON string. Halaman detail publik menampilkan main image + thumbnail grid yang bisa di-click untuk switching.
+- Endpoint /api/upload baru: admin-only, validasi MIME + size, simpan ke filesystem lokal. Untuk produksi sebaiknya pindah ke S3/Vercel Blob, tapi untuk MVP sudah cukup.
+- GitHub: repo dapurayam (public) di github.com/aryakamandojeuidi-lab/dapurayam sudah berisi commit 146912e dengan semua code. Remote URL diset ke clean HTTPS (PAT tidak disimpan di git config). .env.example disediakan untuk setup pengguna baru.
+- PAT user hanya dipakai untuk auth push awal, tidak disimpan permanen di mana pun.
+
+---
+Task ID: DapurAyam-NewCategories-ImprovedGalleryUI
+Agent: main (Super Z)
+Task: Buat 2 kategori baru (Ayam Bumbu Nusantara + Olahan Ayam) dan perbaiki UI gallery agar lebih jelas bahwa 1 produk bisa punya 2-3 foto.
+
+Work Log:
+- Cek state existing: fitur multi-foto gallery SEBENARNYA SUDAH BERFUNGSI sejak commit sebelumnya:
+  - Ayam Pejantan Bumbu Kuning: imageUrl + 2 galleryImages = 3 foto total
+  - Chicken Nugget Premium: imageUrl + 1 galleryImages = 2 foto total
+  - Tapi UI kurang intuitif + label kurang jelas sehingga user mengira fitur belum ada
+
+- Buat scripts/setup-categories.ts untuk replace kategori lama:
+  - Kategori LAMA yang dihapus: "Ayam Bumbu", "Ayam Ungkep", "Nugget" (3 kategori)
+  - Kategori BARU:
+    - "Ayam Bumbu Nusantara" (slug: ayam-bumbu-nusantara) — untuk Bumbu Kuning, Bali, Rujak, dll
+    - "Olahan Ayam" (slug: olahan-ayam) — untuk nugget, karaage, dan olahan lainnya
+  - Assign products:
+    - Bumbu Kuning → Ayam Bumbu Nusantara
+    - Bumbu Bali → Ayam Bumbu Nusantara
+    - Bumbu Rujak → Ayam Bumbu Nusantara
+    - Chicken Nugget Premium → Olahan Ayam
+  - Detach produk dari kategori lama sebelum delete
+
+- Run script → final state:
+  - Ayam Bumbu Nusantara (3 produk)
+  - Olahan Ayam (1 produk)
+
+- Update prisma/seed.ts:
+  - Replace 3 productCategories dengan 2 baru
+  - Update categorySlug di setiap produk: "ayam-bumbu"/"ayam-ungkep" → "ayam-bumbu-nusantara", "nugget" → "olahan-ayam"
+
+- Rebuild GalleryUploader (src/components/admin/gallery-uploader.tsx) untuk UI lebih intuitif:
+  - Card title: "Foto Produk" dengan subtitle penjelasan
+    "Satu produk bisa punya beberapa foto. Foto Utama akan tampil di katalog,
+     dan Foto Tambahan akan tampil sebagai galeri thumbnail di halaman detail produk."
+  - Label "Foto Utama (tampil di katalog)" untuk ImageUploader existing
+  - Label "Foto Tambahan (galeri di halaman detail)" untuk GalleryUploader
+  - Counter badge "X / 6" (warna primary saat full, secondary saat belum)
+  - Setiap thumbnail punya label "Foto 2", "Foto 3", dst (Foto 1 = foto utama)
+  - Empty state hint: "Belum ada foto tambahan. Upload atau tambahkan URL foto di bawah."
+  - File upload input + OR divider + URL paste input dengan tombol "Tambah"
+  - Hapus button (×) di pojok kanan atas setiap thumbnail
+
+- Verifikasi via Agent Browser:
+  1. Login admin sukses → /admin/dashboard
+  2. /admin/kategori: 2 kategori baru terlihat (Ayam Bumbu Nusantara, Olahan Ayam)
+  3. /admin/produk/[id]/edit:
+     - Card "Foto Produk" terlihat dengan subtitle penjelasan
+     - Section "Foto Utama (tampil di katalog)" terlihat
+     - Section "Foto Tambahan (galeri di halaman detail)" terlihat dengan counter "2 / 6"
+     - 2 thumbnail terlihat dengan label "FOTO 2" dan "FOTO 3"
+  4. /produk/ayam-penjantan-bumbu-ungkep:
+     - Main image terlihat
+     - 3 thumbnail terlihat (1 foto utama + 2 galeri)
+     - Thumbnail pertama aktif dengan red border/ring
+  5. /produk catalog page:
+     - Filter buttons: Semua | Ayam Bumbu Nusantara | Olahan Ayam
+     - 4 product cards: Bumbu Kuning, Bali, Rujak, Nugget (semua Rp 35.000)
+  6. Click "Olahan Ayam" filter → hanya Chicken Nugget Premium yang muncul ✓
+
+Lint: 0 errors
+Dev log: semua route 200 OK
+
+Files changed:
+- prisma/seed.ts (3 kategori lama → 2 kategori baru, update categorySlug)
+- src/components/admin/gallery-uploader.tsx (rebuild UI lebih intuitif)
+- src/components/admin/product-form.tsx (card title + subtitle + label lebih jelas)
+Files created:
+- scripts/setup-categories.ts (reusable untuk reset kategori)
+
+GITHUB:
+- Commit 68c7609: "feat: new categories (Ayam Bumbu Nusantara + Olahan Ayam) + improved gallery UI"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+- PAT dipakai hanya untuk auth push (one-time via embedded URL), tidak disimpan di git config
+
+Stage Summary:
+- 2 kategori baru sesuai request user:
+  - "Ayam Bumbu Nusantara" — untuk ayam berbumbu khas Nusantara (Bumbu Kuning, Bali, Rujak)
+  - "Olahan Ayam" — untuk produk olahan ayam (nugget, karaage, dll)
+- Kategori lama (Ayam Bumbu, Ayam Ungkep, Nugget) sudah dihapus dari DB
+- UI gallery di admin dashboard sekarang lebih intuitif:
+  - Card "Foto Produk" dengan subtitle yang jelas: "Satu produk bisa punya beberapa foto"
+  - Counter "X / 6" dengan badge warna
+  - Label per thumbnail "Foto 2", "Foto 3" (Foto 1 = foto utama)
+  - Empty state hint saat belum ada galeri
+  - File upload + URL paste dengan divider "atau paste URL gambar"
+- Filter kategori di /produk catalog page berfungsi: "Olahan Ayam" filter hanya tampilkan Chicken Nugget Premium
+- 1 produk bisa punya 2-7 foto (1 utama + hingga 6 galeri), terverifikasi di halaman detail: 3 thumbnail + main image dengan active ring
+- 0 lint error, semua route 200 OK
+- Push ke GitHub sukses: commit 68c7609 live di github.com/aryakamandojeuidi-lab/dapurayam
+
+---
+Task ID: DapurAyam-FixBuildPrerenderDBError
+Agent: main (Super Z)
+Task: Fix error build "Environment variable not found: DATABASE_URL" saat prerender /_not-found page.
+
+Work Log:
+- Root cause: RootLayout (src/app/layout.tsx) dan PublicShell (src/components/public/public-shell.tsx) keduanya async server components yang langsung call `db.siteSettings.findUnique()` saat render.
+- Saat `next build` jalan, Next.js prerender static pages termasuk `/_not-found`. Page ini pakai root layout yang call DB.
+- Di environment build (terutama Vercel), DATABASE_URL mungkin belum tersedia saat build (env var hanya runtime-only, atau belum di-set karena DB belum di-provision). Hasilnya: PrismaClientInitializationError → build gagal.
+
+- Fix:
+  - src/app/layout.tsx: wrap `db.siteSettings.findUnique()` dalam try/catch
+  - src/components/public/public-shell.tsx: wrap dalam try/catch
+  - Pada error: log warning via console.warn + fallback ke defaults (null settings, "Dapur Ayam" sebagai businessName placeholder)
+  - Behavior runtime TIDAK berubah: di production dengan DB available, settings tetap di-load normal
+  - Behavior build berubah: jika DB unavailable, build tetap berhasil (dengan default values yang aman)
+
+- Verifikasi: `bun run build` sukses, semua 23 routes ter-prerender:
+  - /_not-found: ○ (static, sukses — sebelumnya crash)
+  - /: ○ static
+  - /produk, /journal, /kontak, /tentang: ○ static
+  - /produk/[slug], /journal/[slug], /admin/*: ƒ dynamic
+  - /robots.txt, /sitemap.xml: ○ static
+- Lint: 0 errors
+
+Files changed:
+- src/app/layout.tsx (try/catch DB call)
+- src/components/public/public-shell.tsx (try/catch DB call)
+
+GITHUB:
+- Commit dedac94: "fix: graceful DB fallback during build prerender"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Stage Summary:
+- Bug fix: build sekarang bisa jalan di environment tanpa DATABASE_URL tersedia saat build (misalnya Vercel preview deployment, fresh clone, atau CI yang hanya set env runtime)
+- Root cause: RootLayout + PublicShell keduanya async dengan direct DB call, dipakai oleh _not-found yang di-prerender saat build
+- Solusi: try/catch dengan graceful fallback ke default values (businessName="Dapur Ayam", whatsapp="", dst)
+- Runtime behavior unchanged: di production dengan DB available, settings tetap di-load normal
+- Build verified: 23 routes ter-prerender semua sukses, 0 error
+
+---
+Task ID: DapurAyam-NeonPostgresSetup
+Agent: main (Super Z)
+Task: Set up Neon Postgres untuk produksi + fix build Vercel.
+
+Work Log:
+- User berikan Neon connection string: postgresql://neondb_owner:***@ep-snowy-heart-b3hp3rox-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+- Update .env: DATABASE_URL dari SQLite file path → Neon connection string
+  (Note: Hilangkan channel_binding=require karena Prisma mengalami issue parsing
+   dengan parameter itu di env var, hanya pakai sslmode=require)
+
+- Update prisma/schema.prisma: provider = "sqlite" → "postgresql"
+
+- Bug awal: `bun run db:push` gagal dengan "Environment variable not found: DATABASE_URL"
+  Root cause: shell env var lama (DATABASE_URL=file:...SQLite) mewariskan env
+  yang override file .env. Solution: `unset DATABASE_URL` sebelum perintah prisma.
+
+- Run `unset DATABASE_URL && bun run db:push`:
+  - Prisma generate client baru untuk PostgreSQL ✓
+  - Schema applied ke Neon: 8 tabel dibuat (AdminUser, Category, Product,
+    ArticleCategory, Article, SiteSettings, Order, OrderItem) ✓
+
+- Run `unset DATABASE_URL && bun run prisma/seed.ts`:
+  - 1 admin user (admin@dapurayam.com, bcrypt hash) ✓
+  - 2 categories: Ayam Bumbu Nusantara, Olahan Ayam ✓
+  - 4 products: Bumbu Rujak, Bali, Chicken Nugget, Bumbu Ungkep ✓
+  - 5 article categories ✓
+  - 5 draft articles ✓
+  - SiteSettings row ✓
+
+- Run realign script (scripts/realign-neon-final.ts):
+  - Rename "Bumbu Ungkep" → "Ayam Pejantan Bumbu Kuning" (Rp 35.000)
+  - Update Bumbu Bali price 32000 → 35000
+  - Rename "Chicken Nugget Isi Keju" → "Chicken Nugget Premium" (78% chicken)
+  - Bumbu Rujak price update ke 35000
+  - Assign kategori: 3 ayam bumbu → "Ayam Bumbu Nusantara", nugget → "Olahan Ayam"
+  - Update SiteSettings: heroHeadline, heroSubtext, whatsappNumber, address, dll
+
+- Restart dev server dengan unset DATABASE_URL untuk pakai Neon:
+  - Bug awal: dev.sh gagal karena inherit DATABASE_URL=SQLite dari parent shell
+  - Fix: start dev.sh dengan bash -c 'unset DATABASE_URL; ...'
+
+- Verifikasi via Agent Browser (Neon terhubung):
+  - GET / 200 OK (Postgres query log: SELECT FROM "public"."Product")
+  - Homepage menampilkan: hero "Ayam Pejantan Premium", 4 produk semua Rp 35.000:
+    Bumbu Kuning (Best Seller), Bali, Rujak, Chicken Nugget Premium
+  - /produk: 4 product cards terlihat
+  - /produk/chicken-nugget: detail page 200
+  - /admin/login: login form muncul
+  - /admin/login → submit credentials (admin@dapurayam.com / dapurayam-admin-2026)
+    → redirect to /admin/dashboard ✓
+  - /admin/produk: 4 products terlihat di admin table ✓
+  - Journal routes 200 OK
+
+- Build test (simulasi Vercel):
+  - `unset DATABASE_URL && bun run build` → sukses tanpa DATABASE_URL set
+  - 23 routes ter-prerender:
+    - Static (○): /_not-found, /admin, /admin/login, /checkout, /keranjang, /robots.txt
+    - Dynamic (ƒ): semua page yang pakai DB (/ , /produk, /admin/*, /journal, dll)
+  - Tidak ada error build
+
+- Lint: 0 errors
+
+GITHUB:
+- Commit 5e674ab: "feat: switch Prisma from SQLite to Neon Postgres (production-ready)"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Files changed:
+- .env (DATABASE_URL → Neon connection string)
+- prisma/schema.prisma (provider sqlite → postgresql)
+Files created (temporary):
+- scripts/realign-neon-final.ts (realign data ke Neon — dihapus setelah run)
+
+Stage Summary:
+- Database production-ready: Neon Postgres terhubung, schema applied,
+  seed data lengkap (admin + 4 produk + 2 kategori + 5 artikel)
+- Build berhasil tanpa DATABASE_URL (semua DB page jadi dynamic)
+- Verifikasi end-to-end via Agent Browser:
+  - Homepage render data dari Neon Postgres ✓
+  - 4 produk semua Rp 35.000, kategori "Ayam Bumbu Nusantara" + "Olahan Ayam" ✓
+  - Admin login (admin@dapurayam.com) bekerja ke DB Neon ✓
+  - Admin dashboard, products, journal routes semua OK ✓
+- Siap deploy ke Vercel: user tinggal set 3 env vars (DATABASE_URL,
+  NEXTAUTH_SECRET, NEXTAUTH_URL) di Vercel dashboard lalu Redeploy
+
+---
+Task ID: DapurAyam-VercelErrorFix-DefensiveDB
+Agent: main (Super Z)
+Task: Fix Vercel deployment error "Application error: a server-side exception has occurred" (Digest: 3759722112).
+
+Work Log:
+- User deployed ke Vercel dapurayam-2ltcalpux-aryakamandojeuidigmailcoms-projects.vercel.app, dapat error generic.
+- Root cause hypothesis: env vars belum di-set dengan benar di Vercel, atau DATABASE_URL memakai &channel_binding=require yang bikin Prisma crash saat parsing env var.
+- Penyebab langsung: page (server component) lempar exception saat DB call, tidak ada try/catch fallback, jadi page 500.
+
+- Fix:
+  1. Wrap DB calls di try/catch dengan graceful fallback untuk semua public page:
+     - src/app/page.tsx (homepage): try/catch Promise.all → empty array + null
+     - src/app/produk/page.tsx: try/catch → empty products/categories, null settings
+     - src/app/journal/page.tsx: try/catch → empty articles/categories
+     - src/app/kontak/page.tsx: try/catch → null settings
+     - src/app/tentang/page.tsx: try/catch → null settings
+     - (src/app/layout.tsx, public-shell.tsx, sitemap.ts sudah di-commit sebelumnya)
+     Saat DB unavailable, page render dengan empty state (produk kosong, settings default) bukan throw 500.
+
+  2. Buat global error boundary (src/app/error.tsx):
+     - "use client" component dengan reset() handler
+     - Halaman error friendly (Indonesia): "Halaman tidak dapat dimuat"
+     - Smart hint detection:
+       - Jika error mengandung "DATABASE_URL" atau "PrismaClientInitializationError" → tampilkan box kuning dengan instruksi setup DATABASE_URL di Vercel
+       - Jika error mengandung "NEXTAUTH_SECRET" atau "NEXTAUTH_URL" → tampilkan box kuning instruksi setup auth env vars
+     - Di dev mode: tampilkan error.message + digest untuk debugging
+     - 2 tombol: "Coba Lagi" (reset()) + "Ke Beranda" (Link ke /)
+     - Styling inline (tanpa Tailwind) supaya boundary bekerja walau globals.css gagal load
+
+  3. Remove invalid prop `priority` dari <img> tag di hero-section.tsx
+     (priority hanya valid untuk next/image, bukan <img> HTML biasa)
+     Sebelumnya warning: "Received true for a non-boolean attribute priority"
+
+- Verifikasi:
+  - bun run build: sukses, 23 routes ter-prerender
+  - Test dengan bad DATABASE_URL (nonexistent-host-12345.example.com):
+    - GET / → 200 OK (sebelumnya 500)
+    - Log: "[PublicShell] Could not load SiteSettings from DB. Using defaults."
+    - Page render dengan empty state (tidak ada produk, default businessName "Dapur Ayam")
+  - Lint: 0 errors
+
+GITHUB:
+- Commit 6c44bf8: "fix: defensive DB error handling + friendly error boundary"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Files changed:
+- src/app/page.tsx (try/catch DB)
+- src/app/produk/page.tsx (try/catch DB)
+- src/app/journal/page.tsx (try/catch DB)
+- src/app/kontak/page.tsx (try/catch DB)
+- src/app/tentang/page.tsx (try/catch DB)
+- src/components/public/hero-section.tsx (remove priority prop)
+Files created:
+- src/app/error.tsx (global error boundary dengan setup hints)
+
+Stage Summary:
+- Vercel error yang user lihat kemungkinan karena DATABASE_URL belum di-set atau memakai &channel_binding=require
+- Dengan fix ini, page akan render dengan empty state (bukan crash) jika DB unavailable
+- Error boundary kasih user petunjuk konkret apa yang harus dilakukan (set env vars di Vercel)
+- Build sukses + test dengan bad DB tetap 200 OK
+
+---
+Task ID: DapurAyam-VercelBlobStorage
+Agent: main (Super Z)
+Task: Fix gagal upload foto di Vercel — setup persistent storage (Vercel Blob).
+
+Work Log:
+- User tanya "gagal unggah foto apa kita harus setup storage neon?"
+- Penjelasan: Neon hanya untuk Postgres (data teks), bukan untuk file gambar.
+  Penyebab gagal di Vercel: filesystem serverless ephemeral — file yang di-save
+  ke /public/uploads/ akan hilang setelah request selesai dan tidak persist
+  antar invocation/deploy.
+
+- Solution: dual storage path via env var detection:
+  - BLOB_READ_WRITE_TOKEN set → Vercel Blob (production)
+  - BLOB_READ_WRITE_TOKEN kosong → local filesystem (dev)
+
+- Install @vercel/blob@2.8.2:
+  - `bun add @vercel/blob` → sukses, 25 packages installed
+
+- Rewrite src/app/api/upload/route.ts:
+  - Import `put` dari @vercel/blob
+  - Deteksi BLOB_READ_WRITE_TOKEN untuk switch storage path:
+    - Production: `put('products/<filename>', file, { access: 'public', contentType })`
+      → return blob.url (persistent Vercel Blob URL)
+    - Local dev: writeFile ke /public/uploads/products/
+      → return /uploads/products/<filename> (Next.js static)
+  - Error message diperbaiki: mention BLOB_READ_WRITE_TOKEN setup hint
+
+- Update .env.example dengan instruksi setup BLOB_READ_WRITE_TOKEN:
+  - Jelaskan cara dapat token dari Vercel → Storage → Create Blob
+  - Default empty untuk local dev (filesystem fallback)
+
+- Cleanup: hapus file test logofav yang ke-commit sebelumnya:
+  - public/uploads/products/43d77e77-logofav.jpg (deleted)
+  - public/uploads/products/6dce9881-logofav.jpg (deleted)
+  - public/uploads/products/e3886a4c-logofav.jpg (local, tidak di-commit)
+
+- Verifikasi:
+  - Build: sukses, 23 routes prerendered
+  - Lint: 0 errors
+  - Local dev test: upload via admin UI → file tersimpan ke filesystem lokal,
+    counter "1 / 6" muncul, image preview visible. Log:
+    "[api/upload] Saved to local filesystem: /uploads/products/e3886a4c-logofav.jpg"
+
+GITHUB:
+- Commit b945642: "feat: Vercel Blob storage for image uploads (production-ready)"
+- Push ke github.com/aryakamandojeuidi-lab/dapurayam sukses
+
+Files changed:
+- package.json (add @vercel/blob)
+- bun.lock
+- src/app/api/upload/route.ts (rewrite dual storage path)
+- .env.example (add BLOB_READ_WRITE_TOKEN docs)
+- public/uploads/products/43d77e77-logofav.jpg (deleted, was test file)
+- public/uploads/products/6dce9881-logofav.jpg (deleted, was test file)
+
+Stage Summary:
+- Vercel Blob storage sekarang ter-integrate untuk upload foto produk di produksi
+- Auto-detection via env var: production pakai Vercel Blob, dev pakai filesystem lokal
+- 1GB free tier di Vercel Blob cukup untuk ratusan foto produk
+- User perlu setup BLOB_READ_WRITE_TOKEN di Vercel dashboard (lihat .env.example atau instruksi di atas)

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -11,6 +12,9 @@ import { ProductForm } from "@/components/admin/product-form";
 import { saveProductAction } from "@/actions/product-actions";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditProductPage({ params }: Props) {
@@ -59,6 +63,9 @@ export default async function EditProductPage({ params }: Props) {
           price: product.price,
           packageSize: product.packageSize,
           imageUrl: product.imageUrl,
+          // galleryImages stored as JSON string in DB; pass raw so the form
+          // component can parse it via parseGalleryImages().
+          galleryImages: product.galleryImages as unknown as string[] | null,
           ingredients: product.ingredients,
           storageInstructions: product.storageInstructions,
           servingSuggestion: product.servingSuggestion,

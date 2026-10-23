@@ -1,4 +1,5 @@
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -11,6 +12,9 @@ import { AdminArticlesTable } from "@/components/admin/admin-articles-table";
 import { AdminArticleCategoriesTable } from "@/components/admin/admin-article-categories-table";
 import { db } from "@/lib/db";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 export default async function AdminJournalPage() {
   const [articles, articleCategories] = await Promise.all([
     db.article.findMany({

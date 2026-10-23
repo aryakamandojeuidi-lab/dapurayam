@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -10,17 +11,22 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ChevronRight, Package } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { PublicShell } from "@/components/public/public-shell";
 import { ProductCard } from "@/components/public/product-card";
 import { ArticleCard } from "@/components/public/article-card";
 import { PurchaseOptions } from "@/components/public/purchase-options";
+import { ProductGallery } from "@/components/public/product-gallery";
 import { db } from "@/lib/db";
 import { safeParseArray } from "@/lib/prisma-helpers";
+import { getAllProductPhotos } from "@/lib/gallery";
 import { estimateReadingTime } from "@/lib/markdown";
 import { formatCurrency } from "@/lib/order-display";
 import { cn } from "@/lib/utils";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -133,20 +139,11 @@ export default async function ProductDetailPage({ params }: Props) {
           </Breadcrumb>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
-            {/* Product image */}
-            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-secondary">
-              {product.imageUrl ? (
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="h-full w-full object-contain"
-                />
-              ) : (
-                <div className="grid h-full w-full place-items-center text-muted-foreground">
-                  <Package className="h-16 w-16" />
-                </div>
-              )}
-            </div>
+            {/* Product image gallery (main + thumbnails) */}
+            <ProductGallery
+              photos={getAllProductPhotos(product.imageUrl, product.galleryImages)}
+              alt={product.name}
+            />
 
             {/* Product info */}
             <div className="flex flex-col">

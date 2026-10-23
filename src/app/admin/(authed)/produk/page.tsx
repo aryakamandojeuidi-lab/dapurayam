@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { AdminProductsTable } from "@/components/admin/admin-products-table";
 import {
+
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -11,6 +12,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
+
+// Always dynamic — DB-required page, skip static prerender to avoid build crash when DATABASE_URL not available at build time
+export const dynamic = "force-dynamic";
 export default async function AdminProdukPage() {
   const products = await db.product.findMany({
     include: { category: true },

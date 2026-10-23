@@ -32,19 +32,16 @@ async function main() {
   // --- Product categories ---
   const productCategories = [
     {
-      name: "Ayam Bumbu",
-      slug: "ayam-bumbu",
-      description: "Produk ayam berbumbu siap masak",
+      name: "Ayam Bumbu Nusantara",
+      slug: "ayam-bumbu-nusantara",
+      description:
+        "Ayam berbumbu khas Nusantara — Kuning, Bali, Rujak, dan varian lainnya.",
     },
     {
-      name: "Nugget",
-      slug: "nugget",
-      description: "Berbagai varian nugget ayam",
-    },
-    {
-      name: "Ayam Ungkep",
-      slug: "ayam-ungkep",
-      description: "Ayam yang sudah diungkep dan siap digoreng",
+      name: "Olahan Ayam",
+      slug: "olahan-ayam",
+      description:
+        "Produk olahan ayam siap masak — nugget, karaage, dan varian lainnya.",
     },
   ];
   const catMap: Record<string, { id: string }> = {};
@@ -76,7 +73,7 @@ async function main() {
         "Simpan di freezer (-18°C atau lebih dingin) hingga akan dimasak. Setelah dicairkan, masak segera dan jangan dibekukan ulang.",
       servingSuggestion:
         "Goreng dalam minyak panas hingga keemasan, sajikan dengan nasi hangat dan lalapan.",
-      categorySlug: "ayam-bumbu",
+      categorySlug: "ayam-bumbu-nusantara",
       isActive: true,
       isFeatured: true,
       featuredOrder: 1,
@@ -99,7 +96,7 @@ async function main() {
         "Simpan di freezer (-18°C atau lebih dingin) hingga akan dimasak. Setelah dicairkan, masak segera dan jangan dibekukan ulang.",
       servingSuggestion:
         "Cocok digoreng atau dipanggang. Sajikan dengan sambal matah.",
-      categorySlug: "ayam-bumbu",
+      categorySlug: "ayam-bumbu-nusantara",
       isActive: true,
       isFeatured: true,
       featuredOrder: 2,
@@ -123,7 +120,7 @@ async function main() {
         "Simpan di freezer (-18°C atau lebih dingin). Goreng langsung dari kondisi beku, tidak perlu dicairkan terlebih dahulu. Setelah kemasan dibuka, konsumsi dalam waktu 1 bulan.",
       servingSuggestion:
         "Goreng dalam minyak panas 3-5 menit hingga keemasan. Sajikan dengan saus sambal atau mayonnaise.",
-      categorySlug: "nugget",
+      categorySlug: "olahan-ayam",
       isActive: true,
       isFeatured: true,
       featuredOrder: 3,
@@ -147,7 +144,7 @@ async function main() {
         "Simpan di freezer (-18°C atau lebih dingin) hingga akan dimasak. Setelah dicairkan, masak segera dan jangan dibekukan ulang.",
       servingSuggestion:
         "Goreng 2-3 menit setelah diungkep. Sajikan hangat dengan nasi dan sambal.",
-      categorySlug: "ayam-ungkep",
+      categorySlug: "ayam-bumbu-nusantara",
       isActive: true,
       isFeatured: true,
       featuredOrder: 4,

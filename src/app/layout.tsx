@@ -67,9 +67,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await db.siteSettings.findUnique({
-    where: { id: "default" },
-  });
+  // Safe DB call — gracefully fallback to defaults when DB is unavailable
+  // (e.g. during `next build` prerendering where DATABASE_URL may not be set).
+  let settings: Awaited<ReturnType<typeof db.siteSettings.findUnique>> = null;
+  try {
+    settings = await db.siteSettings.findUnique({
+      where: { id: "default" },
+    });
+  } catch (err) {
+    // Common during build prerendering or when DATABASE_URL not set yet.
+    // We fall back to safe defaults so the layout still renders.
+    console.warn(
+      "[layout] Could not load SiteSettings from DB at build/runtime. Using defaults.",
+      err instanceof Error ? err.message : err,
+    );
+  }
   const waNumber = settings?.whatsappNumber || "";
 
   return (

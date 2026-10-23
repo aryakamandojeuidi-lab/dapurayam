@@ -86,7 +86,6 @@ export function HeroSection({
               src="/uploads/products/hero-ayam-premium.jpg"
               alt="Ayam Pejantan Premium oleh Dapur Ayam"
               className="h-full w-full object-cover"
-              priority
             />
             {/* Soft gradient to ensure badge & text legibility */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />

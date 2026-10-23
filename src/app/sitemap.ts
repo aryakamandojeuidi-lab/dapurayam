@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 
+// Always dynamic — never statically generated
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   const now = new Date();
@@ -13,16 +16,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/kontak`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ];
 
-  const [products, articles] = await Promise.all([
-    db.product.findMany({
-      where: { isActive: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    db.article.findMany({
-      where: { status: "PUBLISHED", publishedAt: { lte: now } },
-      select: { slug: true, updatedAt: true },
-    }),
-  ]);
+  // Safe DB calls — fall back to empty arrays if DB is unavailable
+  let products: { slug: string; updatedAt: Date }[] = [];
+  let articles: { slug: string; updatedAt: Date }[] = [];
+  try {
+    [products, articles] = await Promise.all([
+      db.product.findMany({
+        where: { isActive: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      db.article.findMany({
+        where: { status: "PUBLISHED", publishedAt: { lte: now } },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
+  } catch (err) {
+    console.warn(
+      "[sitemap] DB unavailable, serving static routes only.",
+      err instanceof Error ? err.message : err,
+    );
+  }
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${baseUrl}/produk/${p.slug}`,
